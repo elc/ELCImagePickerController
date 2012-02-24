@@ -9,9 +9,9 @@
 /* Begin PBXBuildFile section */
 		0D82218714F7DDF5008047D0 /* elc-ios-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 0D82217C14F7DDF5008047D0 /* elc-ios-icon.png */; };
 		0D82218814F7DDF5008047D0 /* elc-ios-icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 0D82217D14F7DDF5008047D0 /* elc-ios-icon@2x.png */; };
-		0D82218A14F7DDF5008047D0 /* ELCImagePickerDemoAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D82218114F7DDF5008047D0 /* ELCImagePickerDemoAppDelegate.m */; };
-		0D82218B14F7DDF5008047D0 /* ELCImagePickerDemoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D82218314F7DDF5008047D0 /* ELCImagePickerDemoViewController.m */; };
-		0D82218C14F7DDF5008047D0 /* ELCImagePickerDemoViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0D82218414F7DDF5008047D0 /* ELCImagePickerDemoViewController.xib */; };
+		0D82218A14F7DDF5008047D0 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D82218114F7DDF5008047D0 /* AppDelegate.m */; };
+		0D82218B14F7DDF5008047D0 /* MainController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D82218314F7DDF5008047D0 /* MainController.m */; };
+		0D82218C14F7DDF5008047D0 /* MainController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0D82218414F7DDF5008047D0 /* MainController.xib */; };
 		0D82218D14F7DDF5008047D0 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D82218514F7DDF5008047D0 /* main.m */; };
 		0D82218E14F7DDF5008047D0 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0D82218614F7DDF5008047D0 /* MainWindow.xib */; };
 		0D8221A114F7DDFE008047D0 /* ELCAlbumPickerController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0D82219214F7DDFE008047D0 /* ELCAlbumPickerController.xib */; };
@@ -36,11 +36,11 @@
 /* Begin PBXFileReference section */
 		0D82217C14F7DDF5008047D0 /* elc-ios-icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "elc-ios-icon.png"; sourceTree = "<group>"; };
 		0D82217D14F7DDF5008047D0 /* elc-ios-icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "elc-ios-icon@2x.png"; sourceTree = "<group>"; };
-		0D82218014F7DDF5008047D0 /* ELCImagePickerDemoAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ELCImagePickerDemoAppDelegate.h; sourceTree = "<group>"; };
-		0D82218114F7DDF5008047D0 /* ELCImagePickerDemoAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ELCImagePickerDemoAppDelegate.m; sourceTree = "<group>"; };
-		0D82218214F7DDF5008047D0 /* ELCImagePickerDemoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ELCImagePickerDemoViewController.h; sourceTree = "<group>"; };
-		0D82218314F7DDF5008047D0 /* ELCImagePickerDemoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ELCImagePickerDemoViewController.m; sourceTree = "<group>"; };
-		0D82218414F7DDF5008047D0 /* ELCImagePickerDemoViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ELCImagePickerDemoViewController.xib; sourceTree = "<group>"; };
+		0D82218014F7DDF5008047D0 /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		0D82218114F7DDF5008047D0 /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		0D82218214F7DDF5008047D0 /* MainController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MainController.h; sourceTree = "<group>"; };
+		0D82218314F7DDF5008047D0 /* MainController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MainController.m; sourceTree = "<group>"; };
+		0D82218414F7DDF5008047D0 /* MainController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MainController.xib; sourceTree = "<group>"; };
 		0D82218514F7DDF5008047D0 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		0D82218614F7DDF5008047D0 /* MainWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MainWindow.xib; sourceTree = "<group>"; };
 		0D82219014F7DDFE008047D0 /* ELCAlbumPickerController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ELCAlbumPickerController.h; sourceTree = "<group>"; };
@@ -100,11 +100,11 @@
 				0D8221C114F7DEE5008047D0 /* Prefix.pch */,
 				0D82217C14F7DDF5008047D0 /* elc-ios-icon.png */,
 				0D82217D14F7DDF5008047D0 /* elc-ios-icon@2x.png */,
-				0D82218014F7DDF5008047D0 /* ELCImagePickerDemoAppDelegate.h */,
-				0D82218114F7DDF5008047D0 /* ELCImagePickerDemoAppDelegate.m */,
-				0D82218214F7DDF5008047D0 /* ELCImagePickerDemoViewController.h */,
-				0D82218314F7DDF5008047D0 /* ELCImagePickerDemoViewController.m */,
-				0D82218414F7DDF5008047D0 /* ELCImagePickerDemoViewController.xib */,
+				0D82218014F7DDF5008047D0 /* AppDelegate.h */,
+				0D82218114F7DDF5008047D0 /* AppDelegate.m */,
+				0D82218214F7DDF5008047D0 /* MainController.h */,
+				0D82218314F7DDF5008047D0 /* MainController.m */,
+				0D82218414F7DDF5008047D0 /* MainController.xib */,
 				0D82218514F7DDF5008047D0 /* main.m */,
 				0D82218614F7DDF5008047D0 /* MainWindow.xib */,
 			);
@@ -256,7 +256,7 @@
 			files = (
 				0D82218714F7DDF5008047D0 /* elc-ios-icon.png in Resources */,
 				0D82218814F7DDF5008047D0 /* elc-ios-icon@2x.png in Resources */,
-				0D82218C14F7DDF5008047D0 /* ELCImagePickerDemoViewController.xib in Resources */,
+				0D82218C14F7DDF5008047D0 /* MainController.xib in Resources */,
 				0D82218E14F7DDF5008047D0 /* MainWindow.xib in Resources */,
 				0D8221A114F7DDFE008047D0 /* ELCAlbumPickerController.xib in Resources */,
 				0D8221A414F7DDFE008047D0 /* ELCAssetPicker.xib in Resources */,
@@ -286,8 +286,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0D82218A14F7DDF5008047D0 /* ELCImagePickerDemoAppDelegate.m in Sources */,
-				0D82218B14F7DDF5008047D0 /* ELCImagePickerDemoViewController.m in Sources */,
+				0D82218A14F7DDF5008047D0 /* AppDelegate.m in Sources */,
+				0D82218B14F7DDF5008047D0 /* MainController.m in Sources */,
 				0D82218D14F7DDF5008047D0 /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
