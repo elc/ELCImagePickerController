@@ -105,8 +105,8 @@
 				0D82218214F7DDF5008047D0 /* MainController.h */,
 				0D82218314F7DDF5008047D0 /* MainController.m */,
 				0D82218414F7DDF5008047D0 /* MainController.xib */,
-				0D82218514F7DDF5008047D0 /* main.m */,
 				0D82218614F7DDF5008047D0 /* MainWindow.xib */,
+				0D82218514F7DDF5008047D0 /* main.m */,
 			);
 			path = Demo;
 			sourceTree = "<group>";
@@ -344,11 +344,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_OBJC_ARC = YES;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Demo/Prefix.pch;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = Demo/Info.plist;
 				PRODUCT_NAME = ELCImagePickerDemo;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -359,9 +361,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_OBJC_ARC = YES;
 				COPY_PHASE_STRIP = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Demo/Prefix.pch;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = Demo/Info.plist;
 				PRODUCT_NAME = ELCImagePickerDemo;
 				SDKROOT = iphoneos;

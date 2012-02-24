@@ -13,8 +13,6 @@
     [albumController setParent:elcPicker];
 	[elcPicker setDelegate:self];
 	[self presentModalViewController:elcPicker animated:YES];
-    [elcPicker release];
-    [albumController release];
 }
 
 #pragma mark ELCImagePickerControllerDelegate
@@ -36,7 +34,6 @@
 		imageview.frame = workingFrame;
 		
 		[scrollview addSubview:imageview];
-		[imageview release];
 		
 		workingFrame.origin.x = workingFrame.origin.x + workingFrame.size.width;
 	}
@@ -48,12 +45,6 @@
 - (void) elcImagePickerControllerDidCancel: (ELCImagePickerController*) picker
 {
 	[self dismissModalViewControllerAnimated:YES];
-}
-
-- (void) dealloc
-{
-    [scrollview release];
-    [super dealloc];
 }
 
 @end

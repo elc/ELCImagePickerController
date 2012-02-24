@@ -2,7 +2,7 @@
 
 @interface AppDelegate : NSObject <UIApplicationDelegate>
 
-@property(retain) IBOutlet MainController *viewController;
+@property IBOutlet MainController *viewController;
 
 @end
 

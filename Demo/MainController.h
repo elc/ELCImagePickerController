@@ -2,7 +2,7 @@
 
 @interface MainController : UIViewController <ELCImagePickerControllerDelegate, UINavigationControllerDelegate, UIScrollViewDelegate>
 
-@property(retain) IBOutlet UIScrollView *scrollview;
+@property IBOutlet UIScrollView *scrollview;
 
 - (IBAction) launchController;
 
