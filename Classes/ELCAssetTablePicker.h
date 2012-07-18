@@ -24,6 +24,7 @@
 @property (nonatomic, assign) ALAssetsGroup *assetGroup;
 @property (nonatomic, retain) NSMutableArray *elcAssets;
 @property (nonatomic, retain) IBOutlet UILabel *selectedAssetsLabel;
+@property (nonatomic) BOOL reloadData;
 
 -(int)totalSelectedAssets;
 -(void)preparePhotos;
