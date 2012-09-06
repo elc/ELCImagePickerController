@@ -10,12 +10,19 @@
 #import "ELCAsset.h"
 #import "ELCAlbumPickerController.h"
 
+@interface ELCAssetTablePicker ()
+
+@property (nonatomic, assign) int columns;
+
+@end
 
 @implementation ELCAssetTablePicker
 
 @synthesize parent;
 @synthesize selectedAssetsLabel;
 @synthesize assetGroup, elcAssets;
+@synthesize singleSelection;
+@synthesize columns;
 
 -(void)viewDidLoad {
         
@@ -26,14 +33,37 @@
     self.elcAssets = tempArray;
     [tempArray release];
 	
-	UIBarButtonItem *doneButtonItem = [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(doneAction:)] autorelease];
-	[self.navigationItem setRightBarButtonItem:doneButtonItem];
-	[self.navigationItem setTitle:@"Loading..."];
+    if (self.immediateReturn) {
+        
+    } else {
+        UIBarButtonItem *doneButtonItem = [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(doneAction:)] autorelease];
+        [self.navigationItem setRightBarButtonItem:doneButtonItem];
+        [self.navigationItem setTitle:@"Loading..."];
+    }
 
 	[self performSelectorInBackground:@selector(preparePhotos) withObject:nil];
     
     // Show partial while full list loads
-	[self.tableView performSelector:@selector(reloadData) withObject:nil afterDelay:.5];
+    //	[self.tableView performSelector:@selector(reloadData) withObject:nil afterDelay:.5];
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    self.columns = self.view.bounds.size.width / 80;
+}
+
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation {
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+        return YES;
+    } else {
+        return toInterfaceOrientation != UIInterfaceOrientationPortraitUpsideDown;
+    }
+}
+
+- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation {
+    [super didRotateFromInterfaceOrientation:fromInterfaceOrientation];
+    self.columns = self.view.bounds.size.width / 80;
+    [self.tableView reloadData];
 }
 
 -(void)preparePhotos {
@@ -54,9 +84,18 @@
          [self.elcAssets addObject:elcAsset];
      }];    
     NSLog(@"done enumerating photos");
-	
+    
 	[self.tableView reloadData];
-	[self.navigationItem setTitle:@"Pick Photos"];
+    // scroll to bottom
+    int section = [self numberOfSectionsInTableView:self.tableView] - 1;
+    int row = [self tableView:self.tableView numberOfRowsInSection:section] - 1;
+    NSIndexPath *ip = [NSIndexPath indexPathForRow:row
+                                         inSection:section];
+    [self.tableView scrollToRowAtIndexPath:ip
+                          atScrollPosition:UITableViewScrollPositionBottom
+                                  animated:NO];
+    
+	[self.navigationItem setTitle:self.singleSelection ? @"Pick Photo" : @"Pick Photos"];
     
     [pool release];
 
@@ -74,7 +113,22 @@
 		}
 	}
         
-    [(ELCAlbumPickerController*)self.parent selectedAssets:selectedAssetsImages];
+    [self.parent selectedAssets:selectedAssetsImages];
+}
+
+- (void)assetSelected:(id)asset {
+    if (self.singleSelection) {
+        for(ELCAsset *elcAsset in self.elcAssets)
+        {
+            if(asset != elcAsset) {
+                elcAsset.selected = NO;
+            }
+        }
+    }
+    if (self.immediateReturn) {
+        NSArray *singleAssetArray = [NSArray arrayWithObject:[asset asset]];
+        [(NSObject *)self.parent performSelector:@selector(selectedAssets:) withObject:singleAssetArray afterDelay:0];
+    }
 }
 
 #pragma mark UITableViewDataSource Delegate Methods
@@ -86,10 +140,16 @@
 
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return ceil([self.assetGroup numberOfAssets] / 4.0);
+    return ceil([self.elcAssets count] / (float)self.columns);
 }
 
-- (NSArray*)assetsForIndexPath:(NSIndexPath*)_indexPath {
+- (NSArray *)assetsForIndexPath:(NSIndexPath *)path {
+    int index = path.row * self.columns;
+    int length = MIN(self.columns, [self.elcAssets count] - index);
+    return [self.elcAssets subarrayWithRange:NSMakeRange(index, length)];
+}
+
+- (NSArray*)_assetsForIndexPath:(NSIndexPath*)_indexPath {
     
 	int index = (_indexPath.row*4);
 	int maxIndex = (_indexPath.row*4+3);
