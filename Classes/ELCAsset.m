@@ -8,6 +8,12 @@
 #import "ELCAsset.h"
 #import "ELCAssetTablePicker.h"
 
+@interface ELCAsset ()
+
+@property (nonatomic, strong) UIView *disabledView;
+
+@end
+
 @implementation ELCAsset
 
 @synthesize asset;
@@ -82,17 +88,16 @@
 }
 
 -(void)toggleSelection {
+    if([(ELCAssetTablePicker*)self.parent canSelectAsset:self.asset])
+    {
+        overlayView.hidden = !overlayView.hidden;
+        if (!overlayView.hidden) {
+            [self.parent didSelectAsset:self.asset];
+        } else {
+            [self.parent didDeselectAsset:self.asset];
+        }
     
-	overlayView.hidden = !overlayView.hidden;
-    
-//    if([(ELCAssetTablePicker*)self.parent totalSelectedAssets] >= 10) {
-//        
-//        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Maximum Reached" message:@"" delegate:self cancelButtonTitle:nil otherButtonTitles:@"Ok", nil];
-//		[alert show];
-//		[alert release];	
-//
-//        [(ELCAssetTablePicker*)self.parent doneAction:nil];
-//    }
+    }
 }
 
 -(BOOL)selected {
@@ -105,12 +110,34 @@
 	[overlayView setHidden:!_selected];
 }
 
-- (void)dealloc 
-{    
+#define kDisabledTag 1
+
+- (void)setDisabled:(BOOL)disabledFlag
+{
+    [[self viewWithTag:kDisabledTag] removeFromSuperview];
+    if (disabledFlag) {
+        _disabledView = [[UIView alloc] initWithFrame:CGRectZero];
+        _disabledView.backgroundColor = [UIColor colorWithWhite:0.0f alpha:0.7f];
+        _disabledView.tag = kDisabledTag;
+        [self addSubview:_disabledView];
+    }
+}
+
+- (void)layoutSubviews
+{
+    [super layoutSubviews];
+    
+    _disabledView.frame = self.bounds;
+}
+
+- (void)dealloc
+{
     self.asset = nil;
 	[overlayView release];
     [super dealloc];
 }
+
+#pragma mark - Private
 
 - (CGSize)cameraImageSize
 {

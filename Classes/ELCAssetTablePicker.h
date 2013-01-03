@@ -27,7 +27,9 @@
 
 -(int)totalSelectedAssets;
 -(void)preparePhotos;
-
 -(void)doneAction:(id)sender;
+- (BOOL)canSelectAsset:(ALAsset *)asset;
+- (void)didDeselectAsset:(ALAsset *)asset;
+- (void)didSelectAsset:(ALAsset *)asset;
 
 @end

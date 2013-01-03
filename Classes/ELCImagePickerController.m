@@ -33,7 +33,8 @@
         [workingDictionary setObject:[UIImage imageWithCGImage:[[asset defaultRepresentation] fullResolutionImage]] forKey:@"UIImagePickerControllerOriginalImage"];
 		[workingDictionary setObject:[[asset valueForProperty:ALAssetPropertyURLs] valueForKey:[[[asset valueForProperty:ALAssetPropertyURLs] allKeys] objectAtIndex:0]] forKey:@"UIImagePickerControllerReferenceURL"];
 		
-		[returnArray addObject:workingDictionary];
+        [returnArray addObject:asset];
+//		[returnArray addObject:workingDictionary];
 		
 		[workingDictionary release];	
 	}

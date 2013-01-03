@@ -10,6 +10,11 @@
 #import "ELCAsset.h"
 #import "ELCAlbumPickerController.h"
 
+@interface ELCAssetTablePicker ()
+
+@property (nonatomic, strong) NSMutableSet *selectedAssets;
+
+@end
 
 @implementation ELCAssetTablePicker
 
@@ -18,7 +23,7 @@
 @synthesize assetGroup, elcAssets;
 
 -(void)viewDidLoad {
-        
+    _selectedAssets = [[NSMutableSet alloc] init];
 	[self.tableView setSeparatorColor:[UIColor clearColor]];
 	[self.tableView setAllowsSelection:NO];
 
@@ -135,14 +140,21 @@
         
     ELCAssetCell *cell = (ELCAssetCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
 
+    NSArray *assets = [self assetsForIndexPath:indexPath];
     if (cell == nil) 
     {		        
-        cell = [[[ELCAssetCell alloc] initWithAssets:[self assetsForIndexPath:indexPath] reuseIdentifier:CellIdentifier] autorelease];
+        cell = [[[ELCAssetCell alloc] initWithAssets:assets reuseIdentifier:CellIdentifier] autorelease];
     }	
 	else 
-    {		
-		[cell setAssets:[self assetsForIndexPath:indexPath]];
+    {
+		[cell setAssets:assets];
 	}
+    
+    // Show to user that assets of different type than the selected ones
+    // can't be selected.
+    for(ELCAsset *asset in assets) {
+        [asset setDisabled:![self canSelectAsset:asset.asset]];
+    }
     
     return cell;
 }
@@ -165,6 +177,34 @@
 	}
     
     return count;
+}
+
+- (BOOL)canSelectAsset:(ALAsset *)asset
+{
+    ALAsset *lastSelectedAsset = [_selectedAssets anyObject];
+    if (lastSelectedAsset && [lastSelectedAsset valueForProperty:ALAssetPropertyType] != [asset valueForProperty:ALAssetPropertyType]) {
+        return NO;
+    }
+    
+    return YES;
+}
+
+- (void)didDeselectAsset:(ALAsset *)asset
+{
+    [_selectedAssets removeObject:asset];
+    
+    if ([_selectedAssets count] == 0) {
+        [self.tableView reloadData];
+    }
+}
+
+- (void)didSelectAsset:(ALAsset *)asset
+{
+    BOOL firstSelection = [_selectedAssets count] == 0;
+    [_selectedAssets addObject:asset];
+    if (firstSelection) {
+        [self.tableView reloadData];
+    }
 }
 
 - (void)dealloc 
