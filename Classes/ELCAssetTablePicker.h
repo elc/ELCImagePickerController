@@ -6,28 +6,47 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "ELCThumbnailsTableViewCell.h"
 #import <AssetsLibrary/AssetsLibrary.h>
 
-@interface ELCAssetTablePicker : UITableViewController
-{
-	ALAssetsGroup *assetGroup;
-	
-	NSMutableArray *elcAssets;
-	int selectedAssets;
-	
-	id parent;
-	
-	NSOperationQueue *queue;
-}
 
-@property (nonatomic, assign) id parent;
-@property (nonatomic, assign) ALAssetsGroup *assetGroup;
-@property (nonatomic, retain) NSMutableArray *elcAssets;
-@property (nonatomic, retain) IBOutlet UILabel *selectedAssetsLabel;
+@protocol ELCAssetTablePickerDelegate;
 
--(int)totalSelectedAssets;
--(void)preparePhotos;
 
--(void)doneAction:(id)sender;
+@interface ELCAssetTablePicker : UITableViewController <ELCThumbnailsTableViewCellDelegate>
+
+@property (nonatomic, weak) id<ELCAssetTablePickerDelegate> delegate;
+@property (nonatomic, strong) ALAssetsGroup *assetGroup;
+
+#pragma mark - UI actions
+
+- (void)doneButtonTapped:(UIBarButtonItem *)sender;
+- (void)loadAssets;
+
+#pragma mark - Protected interface
+
+- (void)displayActivityViewAnimated:(BOOL)animated;
+- (void)hideActivityViewAnimated:(BOOL)animated;
+- (BOOL)isDisplayingActivityView;
+
+@end
+
+
+@protocol ELCAssetTablePickerDelegate <NSObject>
+
+- (NSString *)assetTablePickerTitleForLoadingMedia:(ELCAssetTablePicker *)pickerController;
+- (NSString *)assetTablePickerTitleForSelectingMedia:(ELCAssetTablePicker *)pickerController;
+
+- (UIImage *)selectedAssetOverlayImage:(ELCAssetTablePicker *)pickerController;
+
+- (BOOL)assetTablePicker:(ELCAssetTablePicker *)pickerController canSelectAsset:(ALAsset *)asset;
+- (void)assetTablePicker:(ELCAssetTablePicker *)pickerController didSelectAsset:(ALAsset *)asset;
+- (BOOL)assetTablePicker:(ELCAssetTablePicker *)pickerController canDeselectAsset:(ALAsset *)asset;
+- (void)assetTablePicker:(ELCAssetTablePicker *)pickerController didDeselectAsset:(ALAsset *)asset;
+
+- (BOOL)assetTablePicker:(ELCAssetTablePicker *)pickerController isAssetSelected:(ALAsset *)asset;
+- (BOOL)assetTablePicker:(ELCAssetTablePicker *)pickerController isAssetPreSelected:(ALAsset *)asset;
+
+- (void)assetTablePickerIsDone:(ELCAssetTablePicker *)pickerController;
 
 @end
