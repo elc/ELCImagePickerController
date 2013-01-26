@@ -33,7 +33,7 @@
 	
 	UIBarButtonItem *doneButtonItem = [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(doneAction:)] autorelease];
 	[self.navigationItem setRightBarButtonItem:doneButtonItem];
-	[self.navigationItem setTitle:@"Loading..."];
+	[self.navigationItem setTitle:NSLocalizedString(@"Loading...", @"Loading...")];
 
 	[self performSelectorInBackground:@selector(preparePhotos) withObject:nil];
     
@@ -57,11 +57,11 @@
          ELCAsset *elcAsset = [[[ELCAsset alloc] initWithAsset:result] autorelease];
          [elcAsset setParent:self];
          [self.elcAssets addObject:elcAsset];
-     }];    
+     }];
     NSLog(@"done enumerating photos");
 	
 	[self.tableView reloadData];
-	[self.navigationItem setTitle:@"Pick Photos"];
+	[self.navigationItem setTitle:NSLocalizedString(@"Pick Photos", @"Pick Photos")];
     
     [pool release];
 
