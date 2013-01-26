@@ -19,7 +19,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 	
-	[self.navigationItem setTitle:@"Loading..."];
+	[self.navigationItem setTitle:NSLocalizedString(@"Loading...", @"Loading...")];
 
     UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self.parent action:@selector(cancelImagePicker)];
 	[self.navigationItem setRightBarButtonItem:cancelButton];
@@ -72,7 +72,7 @@
 -(void)reloadTableView {
 	
 	[self.tableView reloadData];
-	[self.navigationItem setTitle:@"Select an Album"];
+	[self.navigationItem setTitle:NSLocalizedString(@"Select an Album", @"Select an Album")];
 }
 
 -(void)selectedAssets:(NSArray*)_assets {
@@ -107,7 +107,7 @@
     
     // Get count
     ALAssetsGroup *g = (ALAssetsGroup*)[assetGroups objectAtIndex:indexPath.row];
-    [g setAssetsFilter:[ALAssetsFilter allPhotos]];
+    [g setAssetsFilter:[ALAssetsFilter allAssets]];
     NSInteger gCount = [g numberOfAssets];
     
     cell.textLabel.text = [NSString stringWithFormat:@"%@ (%d)",[g valueForProperty:ALAssetsGroupPropertyName], gCount];
@@ -127,7 +127,7 @@
 
     // Move me    
     picker.assetGroup = [assetGroups objectAtIndex:indexPath.row];
-    [picker.assetGroup setAssetsFilter:[ALAssetsFilter allPhotos]];
+    [picker.assetGroup setAssetsFilter:[ALAssetsFilter allAssets]];
     
 	[self.navigationController pushViewController:picker animated:YES];
 	[picker release];

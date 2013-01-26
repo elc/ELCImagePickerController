@@ -20,6 +20,7 @@
 @property (nonatomic, assign) id parent;
 
 -(id)initWithAsset:(ALAsset*)_asset;
--(BOOL)selected;
+-(BOOL) selected;
+- (void)setDisabled:(BOOL)disabledFlag;
 
 @end

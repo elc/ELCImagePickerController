@@ -32,7 +32,7 @@
 
 - (void)elcImagePickerController:(ELCImagePickerController *)picker didFinishPickingMediaWithInfo:(NSArray *)info {
 	
-	[self dismissModalViewControllerAnimated:YES];
+	[self dismissViewControllerAnimated:YES completion:^{}];
 	
     for (UIView *v in [scrollview subviews]) {
         [v removeFromSuperview];
@@ -59,7 +59,7 @@
 
 - (void)elcImagePickerControllerDidCancel:(ELCImagePickerController *)picker {
 
-	[self dismissModalViewControllerAnimated:YES];
+	[self dismissViewControllerAnimated:YES completion:^{}];
 }
 
 - (void)didReceiveMemoryWarning {
