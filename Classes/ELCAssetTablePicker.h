@@ -13,6 +13,7 @@
 	ALAssetsGroup *assetGroup;
 	
 	NSMutableArray *elcAssets;
+    NSMutableArray *elcAssetsAddress;
 	int selectedAssets;
 	
 	id parent;
@@ -21,6 +22,7 @@
 }
 
 @property (nonatomic, assign) id parent;
+@property (nonatomic, retain) NSMutableArray *elcAssetsAddress;
 @property (nonatomic, assign) ALAssetsGroup *assetGroup;
 @property (nonatomic, retain) NSMutableArray *elcAssets;
 @property (nonatomic, retain) IBOutlet UILabel *selectedAssetsLabel;

@@ -15,7 +15,7 @@
 
 @synthesize parent;
 @synthesize selectedAssetsLabel;
-@synthesize assetGroup, elcAssets;
+@synthesize assetGroup, elcAssets, elcAssetsAddress;
 
 -(void)viewDidLoad {
         
@@ -170,6 +170,7 @@
 - (void)dealloc 
 {
     [elcAssets release];
+    [elcAssetsAddress release];
     [selectedAssetsLabel release];
     [super dealloc];    
 }
