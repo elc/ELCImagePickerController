@@ -13,14 +13,17 @@
 	ALAssetsGroup *assetGroup;
 	
 	NSMutableArray *elcAssets;
+    NSMutableDictionary *elcAssetsDictionary;
 	int selectedAssets;
-	
+	NSMutableArray *selectedAssetsImages;
 	id parent;
 	
 	NSOperationQueue *queue;
 }
 
 @property (nonatomic, assign) id parent;
+@property (nonatomic, retain) NSMutableArray *selectedAssetsImages;
+@property (nonatomic, retain) NSMutableDictionary *elcAssetsDictionary;
 @property (nonatomic, assign) ALAssetsGroup *assetGroup;
 @property (nonatomic, retain) NSMutableArray *elcAssets;
 @property (nonatomic, retain) IBOutlet UILabel *selectedAssetsLabel;

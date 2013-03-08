@@ -14,8 +14,9 @@
 @implementation ELCAssetTablePicker
 
 @synthesize parent;
+@synthesize selectedAssetsImages;
 @synthesize selectedAssetsLabel;
-@synthesize assetGroup, elcAssets;
+@synthesize assetGroup, elcAssets, elcAssetsDictionary;;
 
 -(void)viewDidLoad {
         
@@ -25,6 +26,15 @@
     NSMutableArray *tempArray = [[NSMutableArray alloc] init];
     self.elcAssets = tempArray;
     [tempArray release];
+    
+    
+    NSMutableArray *localArray = [[NSMutableArray alloc] init];
+    self.selectedAssetsImages = localArray;
+    [localArray release];
+    
+    NSMutableDictionary *tempDic = [[NSMutableDictionary alloc] init];
+    self.elcAssetsDictionary = tempDic;
+    [tempDic release];
 	
 	UIBarButtonItem *doneButtonItem = [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(doneAction:)] autorelease];
 	[self.navigationItem setRightBarButtonItem:doneButtonItem];
@@ -39,10 +49,8 @@
 -(void)preparePhotos {
     
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-
-	
     NSLog(@"enumerating photos");
-    [self.assetGroup enumerateAssetsUsingBlock:^(ALAsset *result, NSUInteger index, BOOL *stop) 
+    [self.assetGroup enumerateAssetsWithOptions:NSEnumerationReverse usingBlock:^(ALAsset *result, NSUInteger index, BOOL *stop)
      {         
          if(result == nil) 
          {
@@ -64,8 +72,8 @@
 
 - (void) doneAction:(id)sender {
 	
-	NSMutableArray *selectedAssetsImages = [[[NSMutableArray alloc] init] autorelease];
-	    
+	
+    /*
 	for(ELCAsset *elcAsset in self.elcAssets) 
     {		
 		if([elcAsset selected]) {
@@ -73,8 +81,14 @@
 			[selectedAssetsImages addObject:[elcAsset asset]];
 		}
 	}
+    */
+    
+    for(NSString *key in self.elcAssetsDictionary) {
+        id value = [self.elcAssetsDictionary valueForKey:key];
+        NSLog(@"%@ -> %@", key, value);
+    }
         
-    [(ELCAlbumPickerController*)self.parent selectedAssets:selectedAssetsImages];
+    [(ELCAlbumPickerController*)self.parent selectedAssets:elcAssetsDictionary];
 }
 
 #pragma mark UITableViewDataSource Delegate Methods
@@ -170,6 +184,8 @@
 - (void)dealloc 
 {
     [elcAssets release];
+    [elcAssetsDictionary release];
+    [selectedAssetsImages release];
     [selectedAssetsLabel release];
     [super dealloc];    
 }
