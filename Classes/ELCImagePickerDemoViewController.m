@@ -32,29 +32,31 @@
 
 - (void)elcImagePickerController:(ELCImagePickerController *)picker didFinishPickingMediaWithInfo:(NSArray *)info {
 	
-	[self dismissModalViewControllerAnimated:YES];
+	[self dismissViewControllerAnimated:YES completion:^{
 	
-    for (UIView *v in [scrollview subviews]) {
-        [v removeFromSuperview];
-    }
+        for (UIView *v in [scrollview subviews]) {
+            [v removeFromSuperview];
+        }
     
-	CGRect workingFrame = scrollview.frame;
-	workingFrame.origin.x = 0;
+        CGRect workingFrame = scrollview.frame;
+        workingFrame.origin.x = 0;
 	
-	for(NSDictionary *dict in info) {
+        for(ALAsset *asset in info) {
 	
-		UIImageView *imageview = [[UIImageView alloc] initWithImage:[dict objectForKey:UIImagePickerControllerOriginalImage]];
-		[imageview setContentMode:UIViewContentModeScaleAspectFit];
-		imageview.frame = workingFrame;
+            UIImageView *imageview = [[UIImageView alloc] initWithImage:[UIImage imageWithCGImage:[[asset defaultRepresentation] fullScreenImage]]];
+            [imageview setContentMode:UIViewContentModeScaleAspectFit];
+            imageview.frame = workingFrame;
 		
-		[scrollview addSubview:imageview];
-		[imageview release];
+            [scrollview addSubview:imageview];
+            [imageview release];
 		
-		workingFrame.origin.x = workingFrame.origin.x + workingFrame.size.width;
-	}
+            workingFrame.origin.x = workingFrame.origin.x + workingFrame.size.width;
+        }
 	
-	[scrollview setPagingEnabled:YES];
-	[scrollview setContentSize:CGSizeMake(workingFrame.origin.x, workingFrame.size.height)];
+        [scrollview setPagingEnabled:YES];
+        [scrollview setContentSize:CGSizeMake(workingFrame.origin.x, workingFrame.size.height)];
+        
+    }];
 }
 
 - (void)elcImagePickerControllerDidCancel:(ELCImagePickerController *)picker {

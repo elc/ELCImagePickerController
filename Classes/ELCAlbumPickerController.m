@@ -75,7 +75,7 @@
 	[self.navigationItem setTitle:@"Select an Album"];
 }
 
--(void)selectedAssets:(NSArray*)_assets {
+-(void)selectedAssets:(NSMutableDictionary*)_assets {
 	
 	[(ELCImagePickerController*)parent selectedAssets:_assets];
 }

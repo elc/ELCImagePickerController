@@ -22,20 +22,21 @@
 	}
 }
 
--(void)selectedAssets:(NSArray*)_assets {
+-(void)selectedAssets:(NSMutableDictionary*)_assets {
 
 	NSMutableArray *returnArray = [[[NSMutableArray alloc] init] autorelease];
 	
-	for(ALAsset *asset in _assets) {
+	for(NSString *key in _assets) {
 
-		NSMutableDictionary *workingDictionary = [[NSMutableDictionary alloc] init];
+        ALAsset *asset = (ALAsset *)[_assets objectForKey:key];
+/*		NSMutableDictionary *workingDictionary = [[NSMutableDictionary alloc] init];
 		[workingDictionary setObject:[asset valueForProperty:ALAssetPropertyType] forKey:@"UIImagePickerControllerMediaType"];
         [workingDictionary setObject:[UIImage imageWithCGImage:[[asset defaultRepresentation] fullScreenImage]] forKey:@"UIImagePickerControllerOriginalImage"];
 		[workingDictionary setObject:[[asset valueForProperty:ALAssetPropertyURLs] valueForKey:[[[asset valueForProperty:ALAssetPropertyURLs] allKeys] objectAtIndex:0]] forKey:@"UIImagePickerControllerReferenceURL"];
+*/		
+		[returnArray addObject:asset];
 		
-		[returnArray addObject:workingDictionary];
-		
-		[workingDictionary release];	
+//		[workingDictionary release];
 	}
 	
     [self popToRootViewControllerAnimated:NO];
