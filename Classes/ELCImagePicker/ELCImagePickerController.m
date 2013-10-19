@@ -23,6 +23,20 @@
 	}
 }
 
+- (BOOL)shouldSelectAsset:(ELCAsset *)asset previousCount:(NSUInteger)previousCount {
+    BOOL shouldSelect = previousCount < self.maximumImagesCount;
+    if (!shouldSelect) {
+        NSString *title = [NSString stringWithFormat:NSLocalizedString(@"Only %d photos please!", nil), self.maximumImagesCount];
+        NSString *message = [NSString stringWithFormat:NSLocalizedString(@"You can only send %d photos at a time.", nil), self.maximumImagesCount];
+        [[[UIAlertView alloc] initWithTitle:title
+                                    message:message
+                                   delegate:nil
+                          cancelButtonTitle:nil
+                          otherButtonTitles:NSLocalizedString(@"Okay", nil), nil] show];
+    }
+    return shouldSelect;
+}
+
 - (void)selectedAssets:(NSArray *)assets
 {
 	NSMutableArray *returnArray = [[[NSMutableArray alloc] init] autorelease];
@@ -35,7 +49,7 @@
         
         CGImageRef imgRef = [assetRep fullScreenImage];
         UIImage *img = [UIImage imageWithCGImage:imgRef
-                                           scale:[UIScreen mainScreen].scale
+                                           scale:1.0f
                                      orientation:(UIImageOrientation)assetRep.orientation];
         [workingDictionary setObject:img forKey:@"UIImagePickerControllerOriginalImage"];
 		[workingDictionary setObject:[[asset valueForProperty:ALAssetPropertyURLs] valueForKey:[[[asset valueForProperty:ALAssetPropertyURLs] allKeys] objectAtIndex:0]] forKey:@"UIImagePickerControllerReferenceURL"];
