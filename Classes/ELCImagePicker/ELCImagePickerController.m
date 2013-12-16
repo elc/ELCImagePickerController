@@ -82,7 +82,7 @@
         //so use UIImageOrientationUp when creating our image below.
         ALAssetRepresentation *assetRep = [asset defaultRepresentation];
         
-        CGImageRef imgRef = [assetRep fullScreenImage];
+        CGImageRef imgRef = [assetRep fullResolutionImage];
         UIImage *img = [UIImage imageWithCGImage:imgRef
                                            scale:1.0f
                                      orientation:UIImageOrientationUp];
