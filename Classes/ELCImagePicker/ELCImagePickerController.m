@@ -12,6 +12,7 @@
 #import "ELCAssetTablePicker.h"
 #import "ELCAlbumPickerController.h"
 #import <CoreLocation/CoreLocation.h>
+#import <MobileCoreServices/UTCoreTypes.h>
 
 @implementation ELCImagePickerController
 
@@ -25,6 +26,7 @@
     if (self) {
         self.maximumImagesCount = 4;
         [albumPicker setParent:self];
+        self.mediaTypes = @[(NSString *)kUTTypeImage];
     }
     return self;
 }
@@ -36,6 +38,21 @@
         self.maximumImagesCount = 4;
     }
     return self;
+}
+
+- (ELCAlbumPickerController *)albumPicker
+{
+    return self.viewControllers[0];
+}
+
+- (void)setMediaTypes:(NSArray *)mediaTypes
+{
+    self.albumPicker.mediaTypes = mediaTypes;
+}
+
+- (NSArray *)mediaTypes
+{
+    return self.albumPicker.mediaTypes;
 }
 
 - (void)cancelImagePicker
