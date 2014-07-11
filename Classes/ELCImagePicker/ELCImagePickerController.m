@@ -12,6 +12,7 @@
 #import "ELCAssetTablePicker.h"
 #import "ELCAlbumPickerController.h"
 #import <CoreLocation/CoreLocation.h>
+#import "ELCConsole.h"
 
 @implementation ELCImagePickerController
 
@@ -64,7 +65,8 @@
 {
 	NSMutableArray *returnArray = [[NSMutableArray alloc] init];
 	
-	for(ALAsset *asset in assets) {
+	for(ELCAsset *elcasset in assets) {
+        ALAsset *asset = elcasset.asset;
 		id obj = [asset valueForProperty:ALAssetPropertyType];
 		if (!obj) {
 			continue;
@@ -117,6 +119,16 @@
     } else {
         return toInterfaceOrientation != UIInterfaceOrientationPortraitUpsideDown;
     }
+}
+
+- (BOOL)onOrder
+{
+    return [[ELCConsole mainConsole] onOrder];
+}
+
+- (void)setOnOrder:(BOOL)onOrder
+{
+    [[ELCConsole mainConsole] setOnOrder:onOrder];
 }
 
 @end
