@@ -28,6 +28,7 @@
     elcPicker.maximumImagesCount = 4;
     elcPicker.returnsOriginalImage = NO; //Only return the fullScreenImage, not the fullResolutionImage
 	elcPicker.imagePickerDelegate = self;
+    elcPicker.onOrder = YES;
     
     [self presentViewController:elcPicker animated:YES completion:nil];
     
