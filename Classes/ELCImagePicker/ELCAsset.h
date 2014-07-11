@@ -26,5 +26,5 @@
 @property (nonatomic,assign) int index;
 
 - (id)initWithAsset:(ALAsset *)asset;
-
+- (NSComparisonResult)compareWithIndex:(ELCAsset *)_ass;
 @end
