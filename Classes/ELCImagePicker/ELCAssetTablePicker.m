@@ -161,7 +161,7 @@
         }
     }
     if (self.immediateReturn) {
-        NSArray *singleAssetArray = @[asset.asset];
+        NSArray *singleAssetArray = @[asset];
         [(NSObject *)self.parent performSelector:@selector(selectedAssets:) withObject:singleAssetArray afterDelay:0];
     }
 }
