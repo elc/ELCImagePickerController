@@ -58,6 +58,15 @@
     }
 }
 
+- (BOOL)isSelectable {
+    
+    if ([_parent respondsToSelector:@selector(isSelectable)]) {
+        return [_parent isSelectable];
+    }else {
+        return NO;
+    }
+}
+
 - (NSComparisonResult)compareWithIndex:(ELCAsset *)_ass
 {
     if (self.index > _ass.index) {

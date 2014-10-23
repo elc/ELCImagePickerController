@@ -154,6 +154,20 @@
     return shouldSelect;
 }
 
+- (BOOL)isSelectable {
+    
+    NSUInteger selectionCount = 0;
+    for (ELCAsset *elcAsset in self.elcAssets) {
+        if (elcAsset.selected) selectionCount++;
+    }
+    
+    if ([self.parent respondsToSelector:@selector(isSelectableIndexNumber:)]) {
+        return [self.parent isSelectableIndexNumber:selectionCount];
+    }else {
+        return NO;
+    }
+}
+
 - (void)assetSelected:(ELCAsset *)asset
 {
     if (self.singleSelection) {

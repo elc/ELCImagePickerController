@@ -94,21 +94,30 @@
     
 	CGRect frame = CGRectMake(startX, 2, 75, 75);
 	
-	for (int i = 0; i < [_rowAssets count]; ++i) {
+    for (int i = 0; i < [_rowAssets count]; ++i) {
         if (CGRectContainsPoint(frame, point)) {
             ELCAsset *asset = [_rowAssets objectAtIndex:i];
-            asset.selected = !asset.selected;
             ELCOverlayImageView *overlayView = [_overlayViewArray objectAtIndex:i];
-            overlayView.hidden = !asset.selected;
-            if (asset.selected) {
+            
+            // If the asset is not selected check if it could be selected
+            if (!asset.selected && [asset isSelectable]) {
+                asset.selected = !asset.selected;
+                overlayView.hidden = !asset.selected;
+                
                 asset.index = [[ELCConsole mainConsole] numOfSelectedElements];
                 [overlayView setIndex:asset.index+1];
                 [[ELCConsole mainConsole] addIndex:asset.index];
-            }
-            else
-            {
+            }else if(asset.selected) { // If the asset is going to be unselected
+                asset.selected = !asset.selected;
+                overlayView.hidden = !asset.selected;
+                
+                asset.index = 0;
+                [overlayView setIndex:asset.index];
                 int lastElement = [[ELCConsole mainConsole] numOfSelectedElements] - 1;
                 [[ELCConsole mainConsole] removeIndex:lastElement];
+            }else if (!asset.selected && ![asset isSelectable]) {
+                // If the asset isn't selected and is not selectable, try to select to show a message to the user
+                asset.selected = !asset.selected;
             }
             break;
         }

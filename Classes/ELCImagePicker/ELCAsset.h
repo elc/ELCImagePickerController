@@ -15,6 +15,7 @@
 @optional
 - (void)assetSelected:(ELCAsset *)asset;
 - (BOOL)shouldSelectAsset:(ELCAsset *)asset;
+- (BOOL)isSelectable;
 - (void)assetDeselected:(ELCAsset *)asset;
 - (BOOL)shouldDeselectAsset:(ELCAsset *)asset;
 @end
@@ -25,6 +26,7 @@
 @property (nonatomic, strong) ALAsset *asset;
 @property (nonatomic, weak) id<ELCAssetDelegate> parent;
 @property (nonatomic, assign) BOOL selected;
+@property (nonatomic, readonly, getter = isSelectable) BOOL selectable;
 @property (nonatomic,assign) int index;
 
 - (id)initWithAsset:(ALAsset *)asset;

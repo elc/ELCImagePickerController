@@ -87,6 +87,11 @@
     return YES;
 }
 
+- (BOOL)isSelectableIndexNumber:(NSUInteger)indexNumber {
+    
+    return (indexNumber < self.maximumImagesCount);
+}
+
 - (void)selectedAssets:(NSArray *)assets
 {
 	NSMutableArray *returnArray = [[NSMutableArray alloc] init];

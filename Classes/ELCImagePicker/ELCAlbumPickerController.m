@@ -118,6 +118,15 @@
     return [self.parent shouldDeselectAsset:asset previousCount:previousCount];
 }
 
+- (BOOL)isSelectableIndexNumber:(NSUInteger)indexNumber {
+    
+    if ([self.parent respondsToSelector:@selector(isSelectableIndexNumber:)]) {
+        return [self.parent isSelectableIndexNumber:indexNumber];
+    }else {
+        return NO;
+    }
+}
+
 - (void)selectedAssets:(NSArray*)assets
 {
 	[_parent selectedAssets:assets];
