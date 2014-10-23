@@ -25,8 +25,8 @@
 {
 	ELCImagePickerController *elcPicker = [[ELCImagePickerController alloc] initImagePicker];
 
-    elcPicker.maximumImagesCount = 100; //Set the maximum number of images to select to 100
-    elcPicker.returnsOriginalImage = YES; //Only return the fullScreenImage, not the fullResolutionImage
+    elcPicker.maximumImagesCount = 8; //Set the maximum number of images to select to 100
+    elcPicker.returnsOriginalImage = NO; //Only return the fullScreenImage, not the fullResolutionImage
     elcPicker.returnsImage = YES; //Return UIimage if YES. If NO, only return asset location information
     elcPicker.onOrder = YES; //For multiple image selection, display and return order of selected images
     elcPicker.mediaTypes = @[(NSString *)kUTTypeImage, (NSString *)kUTTypeMovie]; //Supports image and movie types
