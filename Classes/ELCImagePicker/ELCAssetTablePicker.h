@@ -23,8 +23,8 @@
 // optional, can be used to filter the assets displayed
 @property(nonatomic, weak) id<ELCAssetPickerFilterDelegate> assetPickerFilterDelegate;
 
+- (void)returnBack;
 - (int)totalSelectedAssets;
-- (void)preparePhotos;
 
 - (void)doneAction:(id)sender;
 

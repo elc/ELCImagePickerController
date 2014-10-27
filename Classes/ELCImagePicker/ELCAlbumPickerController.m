@@ -13,6 +13,8 @@
 @interface ELCAlbumPickerController ()
 
 @property (nonatomic, strong) ALAssetsLibrary *library;
+@property (nonatomic, strong) NSString *loadedGroupID;
+@property (nonatomic, strong) NSMutableArray *tempAssetGroups;
 
 @end
 
@@ -37,68 +39,193 @@
     
     ALAssetsLibrary *assetLibrary = [[ALAssetsLibrary alloc] init];
     self.library = assetLibrary;
-
+    
     // Load Albums into assetGroups
     dispatch_async(dispatch_get_main_queue(), ^
     {
-        @autoreleasepool {
-        
-        // Group enumerator Block
-            void (^assetGroupEnumerator)(ALAssetsGroup *, BOOL *) = ^(ALAssetsGroup *group, BOOL *stop) 
-            {
-                if (group == nil) {
-                    return;
-                }
-                
-                // added fix for camera albums order
-                NSString *sGroupPropertyName = (NSString *)[group valueForProperty:ALAssetsGroupPropertyName];
-                NSUInteger nType = [[group valueForProperty:ALAssetsGroupPropertyType] intValue];
-                
-                if ([[sGroupPropertyName lowercaseString] isEqualToString:@"camera roll"] && nType == ALAssetsGroupSavedPhotos) {
-                    [self.assetGroups insertObject:group atIndex:0];
-                }
-                else {
-                    [self.assetGroups addObject:group];
-                }
-
-                // Reload albums
-                [self performSelectorOnMainThread:@selector(reloadTableView) withObject:nil waitUntilDone:YES];
-            };
-            
-            // Group Enumerator Failure Block
-            void (^assetGroupEnumberatorFailure)(NSError *) = ^(NSError *error) {
-                
-                UIAlertView * alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Error", nil) message:[NSString stringWithFormat:@"Album Error: %@ - %@", [error localizedDescription], [error localizedRecoverySuggestion]] delegate:nil cancelButtonTitle:NSLocalizedString(@"Ok", nil) otherButtonTitles:nil];
-                [alert show];
-                
-                NSLog(@"A problem occured %@", [error description]);	                                 
-            };	
-                    
-            // Enumerate Albums
-            [self.library enumerateGroupsWithTypes:ALAssetsGroupAll
-                                   usingBlock:assetGroupEnumerator 
-                                 failureBlock:assetGroupEnumberatorFailure];
-        
-        }
+       @autoreleasepool {
+           
+           // Group enumerator Block
+           void (^assetGroupEnumerator)(ALAssetsGroup *, BOOL *) = ^(ALAssetsGroup *group, BOOL *stop)
+           {
+               if (group == nil) {
+                   [self performSelectorOnMainThread:@selector(reloadTableView) withObject:nil waitUntilDone:YES];
+                   return;
+               }
+               
+               // added fix for camera albums order
+               NSString *sGroupPropertyName = (NSString *)[group valueForProperty:ALAssetsGroupPropertyName];
+               NSUInteger nType = [[group valueForProperty:ALAssetsGroupPropertyType] intValue];
+               
+               if ([[sGroupPropertyName lowercaseString] isEqualToString:@"camera roll"] && nType == ALAssetsGroupSavedPhotos) {
+                   [self.assetGroups insertObject:group atIndex:0];
+               }
+               else {
+                   [self.assetGroups addObject:group];
+               }
+           };
+           
+           // Group Enumerator Failure Block
+           void (^assetGroupEnumberatorFailure)(NSError *) = ^(NSError *error) {
+               
+               UIAlertView * alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Error", nil) message:[NSString stringWithFormat:@"Album Error: %@ - %@", [error localizedDescription], [error localizedRecoverySuggestion]] delegate:nil cancelButtonTitle:NSLocalizedString(@"Ok", nil) otherButtonTitles:nil];
+               [alert show];
+               
+               NSLog(@"A problem occurred %@", [error description]);
+           };	
+           
+           // Enumerate Albums
+           [self.library enumerateGroupsWithTypes:ALAssetsGroupAll
+                                       usingBlock:assetGroupEnumerator 
+                                     failureBlock:assetGroupEnumberatorFailure];
+           
+       }
     });
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(checkAlbums) name:ALAssetsLibraryChangedNotification object:nil];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadTableView) name:ALAssetsLibraryChangedNotification object:nil];
+    self.loadedGroupID = @"";
     [self.tableView reloadData];
 }
 
-- (void)viewWillDisappear:(BOOL)animated {
+- (void)didReceiveMemoryWarning {
     
     [[NSNotificationCenter defaultCenter] removeObserver:self name:ALAssetsLibraryChangedNotification object:nil];
 }
 
-- (void)reloadTableView
+- (void)dealloc {
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:ALAssetsLibraryChangedNotification object:nil];
+}
+
+- (void)checkAlbums
 {
-	[self.tableView reloadData];
-	[self.navigationItem setTitle:NSLocalizedString(@"Select an Album", nil)];
+    if (!self.tempAssetGroups) {
+        self.tempAssetGroups = [[NSMutableArray alloc] initWithCapacity:0];
+    }
+    [self.tempAssetGroups removeAllObjects];
+    
+    // Load Albums into assetGroups
+    dispatch_async(dispatch_get_main_queue(), ^
+    {
+       @autoreleasepool {
+
+           // Group enumerator Block
+           void (^assetGroupEnumeratorCheck)(ALAssetsGroup *, BOOL *) = ^(ALAssetsGroup *group, BOOL *stop)
+           {
+               if (group == nil) { // End of the enumeration
+                   
+                   NSMutableArray *arrayTemp = [[NSMutableArray alloc] initWithCapacity:1];
+                   
+                   // Check if an album has been added
+                   for (ALAssetsGroup *group1 in self.tempAssetGroups) {
+                       BOOL albumExists = NO;
+                       NSString *groupID1 = (NSString *)[group1 valueForProperty:ALAssetsGroupPropertyPersistentID];
+                       
+                       for (ALAssetsGroup *group2 in self.assetGroups) {
+                           NSString *groupID2 = (NSString *)[group2 valueForProperty:ALAssetsGroupPropertyPersistentID];
+                           
+                           if ([groupID1 isEqualToString:groupID2]) {
+                               albumExists = YES;
+                               break;
+                           }
+                       }
+                       if (!albumExists) {
+                           [arrayTemp addObject: group1];
+                       }
+                   }
+                   //Add the new albums
+                   if (arrayTemp.count > 0) {
+                       [self.assetGroups addObjectsFromArray:arrayTemp];
+                   }
+                   [arrayTemp removeAllObjects];
+                   
+                   // Check if an album has been deleted
+                   for (ALAssetsGroup *group1 in self.assetGroups) {
+                       BOOL albumExists = NO;
+                       NSString *groupID1 = (NSString *)[group1 valueForProperty:ALAssetsGroupPropertyPersistentID];
+                       
+                       for (ALAssetsGroup *group2 in self.tempAssetGroups) {
+                           NSString *groupID2 = (NSString *)[group2 valueForProperty:ALAssetsGroupPropertyPersistentID];
+                           
+                           if ([groupID1 isEqualToString:groupID2]) {
+                               albumExists = YES;
+                               break;
+                           }
+                       }
+                       if (!albumExists) {
+                           [arrayTemp addObject:group1];
+                       }
+                   }
+                   
+                   //Remove the deleted albums
+                   if (arrayTemp.count > 0) {
+                       [self.assetGroups removeObjectsInArray:arrayTemp];
+                   }
+                   
+                   // If an album is loaded, check if it has been deleted to get back
+                   if (self.loadedGroupID.length > 0) {
+                       BOOL albumExists = NO;
+                       for (ALAssetsGroup *group in self.tempAssetGroups) {
+                           NSString *groupID = (NSString *)[group valueForProperty:ALAssetsGroupPropertyPersistentID];
+                           if ([groupID isEqualToString:self.loadedGroupID]) {
+                               albumExists = YES;
+                               break;
+                           }
+                       }
+                       
+                       // If the loaded album has been deleted pop the picker viewcontroller
+                       if (!albumExists) {
+                           [self.picker returnBack];
+                       }
+                   }else {
+                       [self performSelectorOnMainThread:@selector(reloadTableView) withObject:nil waitUntilDone:YES];
+                   }
+                   
+                   return;
+               }
+               
+               // added fix for camera albums order
+               NSString *sGroupPropertyName = (NSString *)[group valueForProperty:ALAssetsGroupPropertyName];
+               NSUInteger nType = [[group valueForProperty:ALAssetsGroupPropertyType] intValue];
+               
+               if ([[sGroupPropertyName lowercaseString] isEqualToString:@"camera roll"] && nType == ALAssetsGroupSavedPhotos) {
+                   [self.tempAssetGroups insertObject:group atIndex:0];
+               }
+               else {
+                   [self.tempAssetGroups addObject:group];
+               }
+           };
+           
+           // Group Enumerator Failure Block
+           void (^assetGroupEnumberatorFailure)(NSError *) = ^(NSError *error) {
+               
+               UIAlertView * alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Error", nil) message:[NSString stringWithFormat:@"Album Error: %@ - %@", [error localizedDescription], [error localizedRecoverySuggestion]] delegate:nil cancelButtonTitle:NSLocalizedString(@"Ok", nil) otherButtonTitles:nil];
+               [alert show];
+               
+               NSLog(@"A problem occured %@", [error description]);	                                 
+           };
+        
+            if (!self.library) {
+                self.library = [[ALAssetsLibrary alloc] init];
+            }
+           
+           // Enumerate Albums
+           [self.library enumerateGroupsWithTypes:ALAssetsGroupAll
+                                       usingBlock:assetGroupEnumeratorCheck
+                                     failureBlock:assetGroupEnumberatorFailure];
+           
+       }
+    });
+}
+
+- (void)reloadTableView {
+    
+    [self.tableView reloadData];
+    [self.navigationItem setTitle:NSLocalizedString(@"Select an Album", nil)];
 }
 
 - (BOOL)shouldSelectAsset:(ELCAsset *)asset previousCount:(NSUInteger)previousCount
@@ -185,15 +312,16 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-	ELCAssetTablePicker *picker = [[ELCAssetTablePicker alloc] initWithNibName: nil bundle: nil];
-	picker.parent = self;
-
-    picker.assetGroup = [self.assetGroups objectAtIndex:indexPath.row];
-    [picker.assetGroup setAssetsFilter:[self assetFilter]];
-    
-	picker.assetPickerFilterDelegate = self.assetPickerFilterDelegate;
+    self.picker = [[ELCAssetTablePicker alloc] initWithNibName: nil bundle: nil];
+	self.picker.parent = self;
+    self.picker.assetGroup = [self.assetGroups objectAtIndex:indexPath.row];
+    [self.picker.assetGroup setAssetsFilter:[self assetFilter]];
+    self.picker.assetPickerFilterDelegate = self.assetPickerFilterDelegate;
 	
-	[self.navigationController pushViewController:picker animated:YES];
+    // Store the persistentID of the album to load
+    self.loadedGroupID = (NSString *)[self.picker.assetGroup valueForProperty:ALAssetsGroupPropertyPersistentID];
+    
+	[self.navigationController pushViewController:self.picker animated:YES];
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath

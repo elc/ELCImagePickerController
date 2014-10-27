@@ -51,7 +51,7 @@
 	[self performSelectorInBackground:@selector(preparePhotos) withObject:nil];
     
     // Register for notifications when the photo library has changed
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(preparePhotos) name:ALAssetsLibraryChangedNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshAssets) name:ALAssetsLibraryChangedNotification object:nil];
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -64,6 +64,15 @@
 {
     [super viewWillDisappear:animated];
     [[ELCConsole mainConsole] removeAllIndex];
+}
+
+- (void)didReceiveMemoryWarning {
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:ALAssetsLibraryChangedNotification object:nil];
+}
+
+- (void)dealloc {
+    
     [[NSNotificationCenter defaultCenter] removeObserver:self name:ALAssetsLibraryChangedNotification object:nil];
 }
 
@@ -104,7 +113,7 @@
                 [self.elcAssets addObject:elcAsset];
             }
 
-         }];
+        }];
 
         dispatch_sync(dispatch_get_main_queue(), ^{
             [self.tableView reloadData];
@@ -124,6 +133,15 @@
     }
 }
 
+- (void)refreshAssets {
+    
+    [self performSelectorInBackground:@selector(preparePhotos) withObject:nil];
+}
+
+- (void)returnBack {
+    
+    [self.navigationController popViewControllerAnimated:YES];
+}
 
 - (void)doneAction:(id)sender
 {	
