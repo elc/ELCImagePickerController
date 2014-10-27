@@ -93,6 +93,7 @@
     @autoreleasepool {
         
         [self.elcAssets removeAllObjects];
+        [[ELCConsole mainConsole] removeAllIndex];
         [self.assetGroup enumerateAssetsUsingBlock:^(ALAsset *result, NSUInteger index, BOOL *stop) {
             
             if (result == nil) {
