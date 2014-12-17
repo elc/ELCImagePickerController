@@ -40,6 +40,63 @@
 	return self;
 }
 
+- (UIImage *)imageForAsset:(ALAsset *)asset
+{
+    UIImage *image;
+    
+    image = [UIImage imageWithCGImage:asset.thumbnail];
+    if([[asset valueForProperty:ALAssetPropertyType] isEqualToString:ALAssetTypeVideo]) {
+        UIImage *typeImage;
+        UIView *view;
+        UIView *typeView;
+        NSNumber *duration;
+        UILabel *durationLabel;
+        NSInteger nbSeconds;
+        NSInteger nbMinutes;
+        NSInteger nbHours;
+        CAGradientLayer *gradientLayer;
+        UIImageView *imageView;
+        
+        imageView = [[UIImageView alloc] initWithImage:image];
+        typeImage = [UIImage imageNamed:@"videoType.png"];
+        
+        duration = [asset valueForProperty:ALAssetPropertyDuration];
+        durationLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, image.size.height - 29, image.size.width - 10, 20)];
+        durationLabel.textColor = [UIColor whiteColor];
+        durationLabel.textAlignment = NSTextAlignmentRight;
+        durationLabel.font = [durationLabel.font fontWithSize:24];
+        nbHours = duration.doubleValue/60/60;
+        nbMinutes = duration.doubleValue/60 - nbHours*60;
+        nbSeconds = duration.doubleValue - nbMinutes*60 - nbHours*60*60;
+        if(nbHours == 0) {
+            durationLabel.text = [NSString stringWithFormat:@"%02d:%02d", (int)nbMinutes, (int)nbSeconds];
+        }
+        else {
+            durationLabel.text = [NSString stringWithFormat:@"%d:%02d:%02d", (int)nbHours, (int)nbMinutes, (int)nbSeconds];
+        }
+        
+        gradientLayer = [CAGradientLayer layer];
+        gradientLayer.colors = @[(id)[UIColor colorWithWhite:0 alpha:0].CGColor, (id)[UIColor colorWithWhite:0 alpha:0.7].CGColor];
+        gradientLayer.frame = CGRectMake(0, image.size.height - 34, image.size.width , 34);
+        [imageView.layer addSublayer:gradientLayer];
+        
+        view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, image.size.width, image.size.height)];
+        typeView = [[UIImageView alloc] initWithImage:typeImage];
+        [view addSubview:imageView];
+        [view addSubview:typeView];
+        [view addSubview:durationLabel];
+        typeView.contentMode = UIViewContentModeCenter;
+        typeView.frame = CGRectMake(10, view.bounds.size.height - 31, 28, 28);
+        
+        UIGraphicsBeginImageContextWithOptions(image.size, NO, 0.0);
+        [view.layer renderInContext:UIGraphicsGetCurrentContext()];
+        image = UIGraphicsGetImageFromCurrentImageContext();
+        UIGraphicsEndImageContext();
+    }
+    
+    return image;
+}
+
 - (void)setAssets:(NSArray *)assets
 {
     self.rowAssets = assets;
@@ -57,9 +114,9 @@
 
         if (i < [_imageViewArray count]) {
             UIImageView *imageView = [_imageViewArray objectAtIndex:i];
-            imageView.image = [UIImage imageWithCGImage:asset.asset.thumbnail];
+            imageView.image = [self imageForAsset:asset.asset];
         } else {
-            UIImageView *imageView = [[UIImageView alloc] initWithImage:[UIImage imageWithCGImage:asset.asset.thumbnail]];
+            UIImageView *imageView = [[UIImageView alloc] initWithImage:[self imageForAsset:asset.asset]];
             [_imageViewArray addObject:imageView];
         }
         
