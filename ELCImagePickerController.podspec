@@ -13,6 +13,7 @@ Pod::Spec.new do |s|
     		   }
     s.platform = :ios, '6.0'
     s.resources = 'Classes/**/*.{xib,png}'
+    s.resource_bundles = { 'ELCImagePickerController' => 'Classes/**/*.lproj' }
     s.source_files = 'Classes/ELCImagePicker/*.{h,m}'
     s.framework = 'Foundation', 'UIKit', 'AssetsLibrary', 'CoreLocation'
     s.requires_arc = true
