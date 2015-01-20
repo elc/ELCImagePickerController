@@ -10,6 +10,7 @@
 #import "ELCAsset.h"
 #import "ELCAlbumPickerController.h"
 #import "ELCConsole.h"
+#import "ELC.h"
 
 @interface ELCAssetTablePicker ()
 
@@ -45,7 +46,7 @@
     } else {
         UIBarButtonItem *doneButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(doneAction:)];
         [self.navigationItem setRightBarButtonItem:doneButtonItem];
-        [self.navigationItem setTitle:NSLocalizedString(@"Loading...", nil)];
+        [self.navigationItem setTitle:[ELC LocalizedString:@"Loading..."]];
     }
 
 	[self performSelectorInBackground:@selector(preparePhotos) withObject:nil];
@@ -118,8 +119,8 @@
                                               atScrollPosition:UITableViewScrollPositionBottom
                                                       animated:NO];
             }
-            
-            [self.navigationItem setTitle:self.singleSelection ? NSLocalizedString(@"Pick Photo", nil) : NSLocalizedString(@"Pick Photos", nil)];
+
+            [self.navigationItem setTitle:self.singleSelection ? [ELC LocalizedString:@"Pick Photo"] : [ELC LocalizedString:@"Pick Photos"]];
         });
     }
 }
