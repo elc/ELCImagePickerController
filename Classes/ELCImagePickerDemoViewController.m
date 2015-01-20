@@ -9,7 +9,7 @@
 #import "ELCImagePickerDemoAppDelegate.h"
 #import "ELCImagePickerDemoViewController.h"
 #import <MobileCoreServices/UTCoreTypes.h>
-
+#import "ELC.h"
 
 @interface ELCImagePickerDemoViewController ()
 
@@ -23,6 +23,7 @@
 
 - (IBAction)launchController
 {
+	[ELC setAlwaysUseMainBundle:YES];
 	ELCImagePickerController *elcPicker = [[ELCImagePickerController alloc] initImagePicker];
 
     elcPicker.maximumImagesCount = 100; //Set the maximum number of images to select to 100

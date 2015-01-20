@@ -28,9 +28,9 @@
 		83C6BC9714476B280064D71D /* elc-ios-icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 83C6BC9514476B280064D71D /* elc-ios-icon@2x.png */; };
 		83C6BC9814476B280064D71D /* elc-ios-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 83C6BC9614476B280064D71D /* elc-ios-icon.png */; };
 		E29A5E3C1239C42A008BB149 /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E29A5E3B1239C42A008BB149 /* AssetsLibrary.framework */; };
-		E507C2871A6DED4C00191D11 /* ELCGlobal.m in Sources */ = {isa = PBXBuildFile; fileRef = E507C2851A6DED4C00191D11 /* ELCGlobal.m */; };
 		E507C28E1A6DED6F00191D11 /* ELCImagePickerController.strings in Resources */ = {isa = PBXBuildFile; fileRef = E507C2891A6DED6F00191D11 /* ELCImagePickerController.strings */; };
 		E507C28F1A6DED6F00191D11 /* ELCImagePickerController.strings in Resources */ = {isa = PBXBuildFile; fileRef = E507C28C1A6DED6F00191D11 /* ELCImagePickerController.strings */; };
+		E507C2921A6DF4A400191D11 /* ELC.m in Sources */ = {isa = PBXBuildFile; fileRef = E507C2911A6DF4A400191D11 /* ELC.m */; };
 		F1DF7842196FA475003524A2 /* ELCConsole.m in Sources */ = {isa = PBXBuildFile; fileRef = F1DF783F196FA475003524A2 /* ELCConsole.m */; };
 		F1DF7843196FA475003524A2 /* ELCOverlayImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = F1DF7841196FA475003524A2 /* ELCOverlayImageView.m */; };
 /* End PBXBuildFile section */
@@ -70,10 +70,10 @@
 		8D1107310486CEB800E47090 /* ELCImagePickerDemo-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "ELCImagePickerDemo-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
 		A58058B417EB865B0078600C /* ELCAssetPickerFilterDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ELCAssetPickerFilterDelegate.h; sourceTree = "<group>"; };
 		E29A5E3B1239C42A008BB149 /* AssetsLibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AssetsLibrary.framework; path = System/Library/Frameworks/AssetsLibrary.framework; sourceTree = SDKROOT; };
-		E507C2851A6DED4C00191D11 /* ELCGlobal.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ELCGlobal.m; sourceTree = "<group>"; };
-		E507C2861A6DED4C00191D11 /* ELCGlobal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ELCGlobal.h; sourceTree = "<group>"; };
 		E507C28A1A6DED6F00191D11 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ELCImagePickerController.strings; sourceTree = "<group>"; };
 		E507C28D1A6DED6F00191D11 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = ELCImagePickerController.strings; sourceTree = "<group>"; };
+		E507C2901A6DF4A400191D11 /* ELC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ELC.h; sourceTree = "<group>"; };
+		E507C2911A6DF4A400191D11 /* ELC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ELC.m; sourceTree = "<group>"; };
 		F1DF783E196FA475003524A2 /* ELCConsole.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ELCConsole.h; sourceTree = "<group>"; };
 		F1DF783F196FA475003524A2 /* ELCConsole.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ELCConsole.m; sourceTree = "<group>"; };
 		F1DF7840196FA475003524A2 /* ELCOverlayImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ELCOverlayImageView.h; sourceTree = "<group>"; };
@@ -178,8 +178,8 @@
 		4252A0981593013500086D05 /* ELCImagePicker */ = {
 			isa = PBXGroup;
 			children = (
-				E507C2851A6DED4C00191D11 /* ELCGlobal.m */,
-				E507C2861A6DED4C00191D11 /* ELCGlobal.h */,
+				E507C2901A6DF4A400191D11 /* ELC.h */,
+				E507C2911A6DF4A400191D11 /* ELC.m */,
 				1A2C0FFD17026CF0004FAFA0 /* ELCAlbumPickerController.h */,
 				1A2C0FFE17026CF0004FAFA0 /* ELCAlbumPickerController.m */,
 				1A2C0FFF17026CF0004FAFA0 /* ELCAsset.h */,
@@ -294,6 +294,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E507C2921A6DF4A400191D11 /* ELC.m in Sources */,
 				1D60589B0D05DD56006BFB54 /* main.m in Sources */,
 				1D3623260D0F684500981E51 /* ELCImagePickerDemoAppDelegate.m in Sources */,
 				F1DF7842196FA475003524A2 /* ELCConsole.m in Sources */,
@@ -303,7 +304,6 @@
 				1A2C100717026CF0004FAFA0 /* ELCAlbumPickerController.m in Sources */,
 				1A2C100817026CF0004FAFA0 /* ELCAsset.m in Sources */,
 				F1DF7843196FA475003524A2 /* ELCOverlayImageView.m in Sources */,
-				E507C2871A6DED4C00191D11 /* ELCGlobal.m in Sources */,
 				1A2C100917026CF0004FAFA0 /* ELCAssetCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

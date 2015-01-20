@@ -9,7 +9,7 @@
 #import "ELCImagePickerController.h"
 #import "ELCAssetTablePicker.h"
 #import <MobileCoreServices/UTCoreTypes.h>
-#import "ELCGlobal.h"
+#import "ELC.h"
 
 @interface ELCAlbumPickerController ()
 
@@ -28,7 +28,7 @@
 {
     [super viewDidLoad];
     [self.tableView setSeparatorStyle:UITableViewCellSeparatorStyleNone];
-    [self.navigationItem setTitle:ELCLocalizedString(@"Loading...")];
+    [self.navigationItem setTitle:[ELC LocalizedString:@"Loading..."]];
 
     UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self.parent action:@selector(cancelImagePicker)];
 	[self.navigationItem setRightBarButtonItem:cancelButton];
@@ -70,12 +70,12 @@
             void (^assetGroupEnumberatorFailure)(NSError *) = ^(NSError *error) {
               
                 if ([ALAssetsLibrary authorizationStatus] == ALAuthorizationStatusDenied) {
-                    NSString *errorMessage = ELCLocalizedString(@"This app does not have access to your photos or videos. You can enable access in Privacy Settings.");
-                    [[[UIAlertView alloc] initWithTitle:ELCLocalizedString(@"Access Denied") message:errorMessage delegate:nil cancelButtonTitle:ELCLocalizedString(@"Ok") otherButtonTitles:nil] show];
+                    NSString *errorMessage = [ELC LocalizedString:@"This app does not have access to your photos or videos. You can enable access in Privacy Settings."];
+                    [[[UIAlertView alloc] initWithTitle:[ELC LocalizedString:@"Access Denied"] message:errorMessage delegate:nil cancelButtonTitle:[ELC LocalizedString:@"Ok"] otherButtonTitles:nil] show];
                   
                 } else {
                     NSString *errorMessage = [NSString stringWithFormat:@"Album Error: %@ - %@", [error localizedDescription], [error localizedRecoverySuggestion]];
-                    [[[UIAlertView alloc] initWithTitle:ELCLocalizedString(@"Error") message:errorMessage delegate:nil cancelButtonTitle:ELCLocalizedString(@"Ok") otherButtonTitles:nil] show];
+                    [[[UIAlertView alloc] initWithTitle:[ELC LocalizedString:@"Error"] message:errorMessage delegate:nil cancelButtonTitle:[ELC LocalizedString:@"Ok"] otherButtonTitles:nil] show];
                 }
 
                 [self.navigationItem setTitle:nil];
@@ -106,7 +106,7 @@
 - (void)reloadTableView
 {
 	[self.tableView reloadData];
-	[self.navigationItem setTitle:ELCLocalizedString(@"Select an Album")];
+    [self.navigationItem setTitle:[ELC LocalizedString:@"Select an Album"]];
 }
 
 - (BOOL)shouldSelectAsset:(ELCAsset *)asset previousCount:(NSUInteger)previousCount
