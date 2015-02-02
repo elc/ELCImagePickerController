@@ -34,7 +34,7 @@
 	[self.navigationItem setRightBarButtonItem:cancelButton];
 
     NSMutableArray *tempArray = [[NSMutableArray alloc] init];
-	self.assetGroups = tempArray;
+	self.assetGroups = nil;
     
     ALAssetsLibrary *assetLibrary = [[ALAssetsLibrary alloc] init];
     self.library = assetLibrary;
@@ -42,54 +42,89 @@
     // Load Albums into assetGroups
     dispatch_async(dispatch_get_main_queue(), ^
     {
-        @autoreleasepool {
-        
-        // Group enumerator Block
-            void (^assetGroupEnumerator)(ALAssetsGroup *, BOOL *) = ^(ALAssetsGroup *group, BOOL *stop) 
-            {
-                if (group == nil) {
-                    return;
-                }
-                
-                // added fix for camera albums order
-                NSString *sGroupPropertyName = (NSString *)[group valueForProperty:ALAssetsGroupPropertyName];
-                NSUInteger nType = [[group valueForProperty:ALAssetsGroupPropertyType] intValue];
-                
-                if ([[sGroupPropertyName lowercaseString] isEqualToString:@"camera roll"] && nType == ALAssetsGroupSavedPhotos) {
-                    [self.assetGroups insertObject:group atIndex:0];
-                }
-                else {
-                    [self.assetGroups addObject:group];
-                }
+		@autoreleasepool {
+			
+			// Group enumerator Block
+			void (^assetGroupEnumerator)(ALAssetsGroup *, BOOL *) = ^(ALAssetsGroup *group, BOOL *stop)
+			{
+				if (group) {
+					[tempArray addObject:group];
+				} else {
+					// finished adding groups.
+					// now sort them and put them into the table
+					NSDictionary *typeOrderReplacements = @{
+															@(ALAssetsGroupSavedPhotos) : @(-3),
+															@(ALAssetsGroupPhotoStream) : @(-2),
+															@(ALAssetsGroupEvent) : @(-1)
+															};
+					[tempArray sortUsingComparator:^NSComparisonResult(ALAssetsGroup *group1, ALAssetsGroup *group2) {
+						NSNumber *originalType1 = [group1 valueForProperty:ALAssetsGroupPropertyType];
+						NSNumber *type1 = typeOrderReplacements[originalType1];
+						if (!type1) {
+							type1 = originalType1;
+						}
+						NSNumber *originalType2 = [group2 valueForProperty:ALAssetsGroupPropertyType];
+						NSNumber *type2 = typeOrderReplacements[originalType2];
+						if (!type2) {
+							type2 = originalType2;
+						}
+						// first, we sort by album type (SavedPhotos, PhotoStream, Event, Library, Album, Faces, unknown, ...)
+						NSComparisonResult result = [type1 compare:type2];
+						if (result == NSOrderedSame) {
+							// second, we sort by album name.
+							// When sorting PhotoStream albums, we prefix the name with underscore when having "stream" in it;
+							// this should put the main photo stream to the top (assuming it is named something like "stream" in the current language).
+							NSString *name1 = [group1 valueForProperty:ALAssetsGroupPropertyName];
+							if ([originalType1 intValue] == ALAssetsGroupPhotoStream && [[name1 lowercaseString] containsString:@"stream"]) {
+								name1 = [@"_" stringByAppendingString:name1];
+							}
+							NSString *name2 = [group2 valueForProperty:ALAssetsGroupPropertyName];
+							if ([originalType2 intValue] == ALAssetsGroupPhotoStream && [[name2 lowercaseString] containsString:@"stream"]) {
+								name2 = [@"_" stringByAppendingString:name2];
+							}
+							result = [name1 caseInsensitiveCompare:name2];
+							if (result == NSOrderedSame) {
+								// the last fallback is to sort by pointer comparison.
+								if (group1 < group2) {
+									result = NSOrderedAscending;
+								} else if (group1 > group2) {
+									result = NSOrderedDescending;
+								}
+							}
+						}
+						return result;
+					}];
 
-                // Reload albums
-                [self performSelectorOnMainThread:@selector(reloadTableView) withObject:nil waitUntilDone:YES];
-            };
-            
-            // Group Enumerator Failure Block
-            void (^assetGroupEnumberatorFailure)(NSError *) = ^(NSError *error) {
-              
-                if ([ALAssetsLibrary authorizationStatus] == ALAuthorizationStatusDenied) {
-                    NSString *errorMessage = NSLocalizedString(@"This app does not have access to your photos or videos. You can enable access in Privacy Settings.", nil);
-                    [[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Access Denied", nil) message:errorMessage delegate:nil cancelButtonTitle:NSLocalizedString(@"Ok", nil) otherButtonTitles:nil] show];
-                  
-                } else {
-                    NSString *errorMessage = [NSString stringWithFormat:@"Album Error: %@ - %@", [error localizedDescription], [error localizedRecoverySuggestion]];
-                    [[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Error", nil) message:errorMessage delegate:nil cancelButtonTitle:NSLocalizedString(@"Ok", nil) otherButtonTitles:nil] show];
-                }
+					self.assetGroups = tempArray;
+					// Reload albums
+					[self performSelectorOnMainThread:@selector(reloadTableView) withObject:nil waitUntilDone:YES];
+				}
+			};
 
-                [self.navigationItem setTitle:nil];
-                NSLog(@"A problem occured %@", [error description]);	                                 
-            };	
-                    
-            // Enumerate Albums
-            [self.library enumerateGroupsWithTypes:ALAssetsGroupAll
-                                   usingBlock:assetGroupEnumerator 
-                                 failureBlock:assetGroupEnumberatorFailure];
-        
-        }
+			// Group Enumerator Failure Block
+			void (^assetGroupEnumberatorFailure)(NSError *) = ^(NSError *error) {
+
+				if ([ALAssetsLibrary authorizationStatus] == ALAuthorizationStatusDenied) {
+					NSString *errorMessage = NSLocalizedString(@"This app does not have access to your photos or videos. You can enable access in Privacy Settings.", nil);
+					[[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Access Denied", nil) message:errorMessage delegate:nil cancelButtonTitle:NSLocalizedString(@"Ok", nil) otherButtonTitles:nil] show];
+
+				} else {
+					NSString *errorMessage = [NSString stringWithFormat:@"Album Error: %@ - %@", [error localizedDescription], [error localizedRecoverySuggestion]];
+					[[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Error", nil) message:errorMessage delegate:nil cancelButtonTitle:NSLocalizedString(@"Ok", nil) otherButtonTitles:nil] show];
+				}
+
+				[self.navigationItem setTitle:nil];
+				NSLog(@"A problem occured %@", [error description]);
+			};
+
+			// Enumerate Albums
+			[self.library enumerateGroupsWithTypes:ALAssetsGroupAll
+										usingBlock:assetGroupEnumerator
+									  failureBlock:assetGroupEnumberatorFailure];
+
+		}
     });
-    
+
 }
 
 - (void)viewWillAppear:(BOOL)animated
