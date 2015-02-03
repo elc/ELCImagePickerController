@@ -10,6 +10,8 @@
 #import "ELCConsole.h"
 #import "ELCOverlayImageView.h"
 
+#import "ELCStreetspotrOverlay.h"	// custom drawn overlay
+
 @interface ELCAssetCell ()
 
 @property (nonatomic, strong) NSArray *rowAssets;
@@ -69,7 +71,7 @@
             overlayView.labIndex.text = [NSString stringWithFormat:@"%d", asset.index + 1];
         } else {
             if (overlayImage == nil) {
-                overlayImage = [UIImage imageNamed:@"Overlay.png"];
+				overlayImage = [UIImage streetspotrELCOverlayImage];
             }
             ELCOverlayImageView *overlayView = [[ELCOverlayImageView alloc] initWithImage:overlayImage];
             [_overlayViewArray addObject:overlayView];
