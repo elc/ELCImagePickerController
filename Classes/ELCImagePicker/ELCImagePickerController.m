@@ -15,6 +15,8 @@
 #import <MobileCoreServices/UTCoreTypes.h>
 #import "ELCConsole.h"
 
+NSString *const ELCIImagePickerControllerAsset = @"ELCIImagePickerControllerAsset";	// added by Streetspotr; key for returned ALAsset
+
 @implementation ELCImagePickerController
 
 //Using auto synthesizers
@@ -126,10 +128,12 @@
                                                    scale:1.0f
                                              orientation:orientation];
                 [workingDictionary setObject:img forKey:UIImagePickerControllerOriginalImage];
-            }
+			} else {
+				[workingDictionary setObject:asset forKey:ELCIImagePickerControllerAsset];	// added by Streetspotr, because getting Asset from URL of photo stream images is not possible for some reason
+			}
 
             [workingDictionary setObject:[[asset valueForProperty:ALAssetPropertyURLs] valueForKey:[[[asset valueForProperty:ALAssetPropertyURLs] allKeys] objectAtIndex:0]] forKey:UIImagePickerControllerReferenceURL];
-            
+
             [returnArray addObject:workingDictionary];
         }
 		

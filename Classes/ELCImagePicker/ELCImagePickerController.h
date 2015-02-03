@@ -9,6 +9,8 @@
 #import <UIKit/UIKit.h>
 #import "ELCAssetSelectionDelegate.h"
 
+extern NSString *const ELCIImagePickerControllerAsset;	// added by Streetspotr; key for returned ALAsset
+
 @class ELCImagePickerController;
 @class ELCAlbumPickerController;
 
