@@ -96,20 +96,23 @@
 	
 	for (int i = 0; i < [_rowAssets count]; ++i) {
         if (CGRectContainsPoint(frame, point)) {
-            ELCAsset *asset = [_rowAssets objectAtIndex:i];
-            asset.selected = !asset.selected;
-            ELCOverlayImageView *overlayView = [_overlayViewArray objectAtIndex:i];
-            overlayView.hidden = !asset.selected;
-            if (asset.selected) {
-                asset.index = [[ELCConsole mainConsole] numOfSelectedElements];
-                [overlayView setIndex:asset.index+1];
-                [[ELCConsole mainConsole] addIndex:asset.index];
-            }
-            else
-            {
-                int lastElement = [[ELCConsole mainConsole] numOfSelectedElements] - 1;
-                [[ELCConsole mainConsole] removeIndex:lastElement];
-            }
+			ELCAsset *asset = [_rowAssets objectAtIndex:i];
+			BOOL oldSelected = asset.selected;
+			asset.selected = !asset.selected;
+			if (!asset.selected != !oldSelected) {	// need this test; elsewise we may accidently remove a still used index from ELCConsole
+				ELCOverlayImageView *overlayView = [_overlayViewArray objectAtIndex:i];
+				overlayView.hidden = !asset.selected;
+				if (asset.selected) {
+					asset.index = [[ELCConsole mainConsole] numOfSelectedElements];
+					[overlayView setIndex:asset.index+1];
+					[[ELCConsole mainConsole] addIndex:asset.index];
+				}
+				else
+				{
+					int lastElement = [[ELCConsole mainConsole] numOfSelectedElements] - 1;
+					[[ELCConsole mainConsole] removeIndex:lastElement];
+				}
+			}
             break;
         }
         frame.origin.x = frame.origin.x + frame.size.width + 4;
