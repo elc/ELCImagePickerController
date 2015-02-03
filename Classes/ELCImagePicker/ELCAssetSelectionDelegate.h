@@ -12,6 +12,8 @@
 
 @protocol ELCAssetSelectionDelegate <NSObject>
 
+@property (nonatomic, readonly) NSInteger maximumImagesCount;
+
 - (void)selectedAssets:(NSArray *)assets;
 - (BOOL)shouldSelectAsset:(ELCAsset *)asset previousCount:(NSUInteger)previousCount;
 - (BOOL)shouldDeselectAsset:(ELCAsset *)asset previousCount:(NSUInteger)previousCount;

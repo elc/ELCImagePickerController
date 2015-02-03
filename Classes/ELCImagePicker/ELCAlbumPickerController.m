@@ -18,6 +18,11 @@
 
 @implementation ELCAlbumPickerController
 
+- (NSInteger)maximumImagesCount
+{
+	return self.parent.maximumImagesCount;
+}
+
 //Using auto synthesizers
 
 #pragma mark -

@@ -41,7 +41,10 @@
 
     NSMutableArray *tempArray = [[NSMutableArray alloc] init];
     self.elcAssets = tempArray;
-	
+
+	self.singleSelection = (self.parent.maximumImagesCount == 1);
+	self.immediateReturn = (self.parent.maximumImagesCount == 1);
+
     if (self.immediateReturn) {
         
     } else {
