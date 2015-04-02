@@ -92,7 +92,7 @@
     CGFloat startX;
     
     if (self.alignmentLeft) {
-        startX = 4;
+        startX = self.itemPadding;
     }else {
         startX = (self.bounds.size.width - totalWidth) / 2;
     }
