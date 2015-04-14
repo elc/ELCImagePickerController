@@ -80,11 +80,11 @@
 							// When sorting PhotoStream albums, we prefix the name with underscore when having "stream" in it;
 							// this should put the main photo stream to the top (assuming it is named something like "stream" in the current language).
 							NSString *name1 = [group1 valueForProperty:ALAssetsGroupPropertyName];
-							if ([originalType1 intValue] == ALAssetsGroupPhotoStream && [[name1 lowercaseString] containsString:@"stream"]) {
+							if ([originalType1 intValue] == ALAssetsGroupPhotoStream && [name1 rangeOfString:@"stream" options:NSCaseInsensitiveSearch].location != NSNotFound) {
 								name1 = [@"_" stringByAppendingString:name1];
 							}
 							NSString *name2 = [group2 valueForProperty:ALAssetsGroupPropertyName];
-							if ([originalType2 intValue] == ALAssetsGroupPhotoStream && [[name2 lowercaseString] containsString:@"stream"]) {
+							if ([originalType2 intValue] == ALAssetsGroupPhotoStream && [name2 rangeOfString:@"stream" options:NSCaseInsensitiveSearch].location != NSNotFound) {
 								name2 = [@"_" stringByAppendingString:name2];
 							}
 							result = [name1 caseInsensitiveCompare:name2];
