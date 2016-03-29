@@ -66,6 +66,7 @@
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+    [[ELCConsole mainConsole] removeAllIndex];
     self.columns = self.view.bounds.size.width / 80;
     [self performSelectorInBackground:@selector(processPhotos) withObject:nil];
 }
@@ -111,6 +112,7 @@
     
     @autoreleasepool {
         [self.elcAssets removeAllObjects];
+        [[ELCConsole mainConsole] removeAllIndex];
         if (!IS_IOS8) {
             [((ALAssetsGroup *)self.assetGroup) enumerateAssetsUsingBlock:^(ALAsset *result, NSUInteger index, BOOL *stop) {
                 
@@ -313,7 +315,7 @@
     long index = path.row * self.columns;
     long length = MIN(self.columns, [self.elcAssets count] - index);
     NSRange subarrayRange = NSMakeRange(index, length);
-    if (NSMaxRange(subarrayRange) >= self.elcAssets.count) {
+    if (NSMaxRange(subarrayRange) > self.elcAssets.count) {
         return nil;
     }
     return [self.elcAssets subarrayWithRange:subarrayRange];
