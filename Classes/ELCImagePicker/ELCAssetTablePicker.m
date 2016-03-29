@@ -17,6 +17,8 @@
 @interface ELCAssetTablePicker () <PHPhotoLibraryChangeObserver>
 
 @property (nonatomic, assign) int columns;
+@property (strong, nonatomic) id synchronizationObject;
+@property (assign, nonatomic, getter=isProcessing) BOOL processing;
 
 @end
 
@@ -50,8 +52,6 @@
         [self.navigationItem setRightBarButtonItem:doneButtonItem];
         [self.navigationItem setTitle:NSLocalizedString(@"Loading...", nil)];
     }
-
-	
     
     // Register for notifications when the photo library has changed
     if(!IS_IOS8){
@@ -67,6 +67,7 @@
 {
     [super viewWillAppear:animated];
     self.columns = self.view.bounds.size.width / 80;
+    [self performSelectorInBackground:@selector(processPhotos) withObject:nil];
 }
 
 - (void)viewWillDisappear:(BOOL)animated
@@ -96,13 +97,27 @@
 
 - (void)preparePhotos
 {
+    [self performSelectorInBackground:@selector(processPhotos) withObject:nil];
+}
+
+- (void)processPhotos
+{
+    @synchronized(self.synchronizationObject) {
+        if (self.processing) {
+            return;
+        }
+        self.processing = YES;
+    }
+    
     @autoreleasepool {
-        
         [self.elcAssets removeAllObjects];
         if (!IS_IOS8) {
             [((ALAssetsGroup *)self.assetGroup) enumerateAssetsUsingBlock:^(ALAsset *result, NSUInteger index, BOOL *stop) {
                 
                 if (result == nil) {
+                    @synchronized(self.synchronizationObject) {
+                        self.processing = NO;
+                    }
                     return;
                 }
                 
@@ -155,6 +170,12 @@
                     [self.elcAssets addObject:elcAsset];
                 }
             }
+            
+
+            @synchronized(self.synchronizationObject) {
+                self.processing = NO;
+            }
+            
             
             dispatch_sync(dispatch_get_main_queue(), ^{
                 [self.tableView reloadData];
@@ -282,9 +303,7 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    if (self.columns <= 0) { //Sometimes called before we know how many columns we have
-        self.columns = 4;
-    }
+
     NSInteger numRows = ceil([self.elcAssets count] / (float)self.columns);
     return numRows;
 }
@@ -293,7 +312,11 @@
 {
     long index = path.row * self.columns;
     long length = MIN(self.columns, [self.elcAssets count] - index);
-    return [self.elcAssets subarrayWithRange:NSMakeRange(index, length)];
+    NSRange subarrayRange = NSMakeRange(index, length);
+    if (NSMaxRange(subarrayRange) >= self.elcAssets.count) {
+        return nil;
+    }
+    return [self.elcAssets subarrayWithRange:subarrayRange];
 }
 
 // Customize the appearance of table view cells.
@@ -339,6 +362,17 @@
         self.assetGroup = [changeDetails fetchResultAfterChanges];
         [self preparePhotos];
     }
+}
+
+#pragma mark - Property -
+
+#pragma mark Lazy loading
+
+- (id)synchronizationObject {
+    if (_synchronizationObject == nil) {
+        _synchronizationObject = [NSObject new];
+    }
+    return _synchronizationObject;
 }
 
 

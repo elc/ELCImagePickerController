@@ -82,6 +82,7 @@
                 overlayView.hidden = asset.selected ? NO : YES;
                 overlayView.labIndex.text = [NSString stringWithFormat:@"%d", asset.index + 1];
             }
+
         }
     } else {
    
