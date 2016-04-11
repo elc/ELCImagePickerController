@@ -19,6 +19,29 @@
 
 @implementation ELCImagePickerController
 
+#pragma mark - property -
+
+- (BOOL)onOrder
+{
+    return [[ELCConsole mainConsole] onOrder];
+}
+
+- (void)setOnOrder:(BOOL)onOrder
+{
+    [[ELCConsole mainConsole] setOnOrder:onOrder];
+}
+
+- (BOOL)sortImagesAscendingByDates {
+    BOOL result = [[ELCConsole mainConsole] sortImagesAscendingByDates];
+    return result;
+}
+
+- (void)setSortImagesAscendingByDates:(BOOL)sortImagesAscendingByDates {
+    [[ELCConsole mainConsole] setSortImagesAscendingByDates:sortImagesAscendingByDates];
+}
+
+#pragma mark - life cycle -
+
 //Using auto synthesizers
 
 - (id)initImagePicker
@@ -160,16 +183,6 @@
     } else {
         return toInterfaceOrientation != UIInterfaceOrientationPortraitUpsideDown;
     }
-}
-
-- (BOOL)onOrder
-{
-    return [[ELCConsole mainConsole] onOrder];
-}
-
-- (void)setOnOrder:(BOOL)onOrder
-{
-    [[ELCConsole mainConsole] setOnOrder:onOrder];
 }
 
 @end

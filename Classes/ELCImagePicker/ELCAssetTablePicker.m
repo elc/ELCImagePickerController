@@ -114,7 +114,12 @@
         [self.elcAssets removeAllObjects];
         [[ELCConsole mainConsole] removeAllIndex];
         if (!IS_IOS8) {
-            [((ALAssetsGroup *)self.assetGroup) enumerateAssetsUsingBlock:^(ALAsset *result, NSUInteger index, BOOL *stop) {
+            NSEnumerationOptions options = NSEnumerationReverse;
+            if ([[ELCConsole mainConsole] sortImagesAscendingByDates]) {
+                options = 0;
+            }
+            [((ALAssetsGroup *)self.assetGroup) enumerateAssetsWithOptions:options
+                                                                usingBlock:^(ALAsset *result, NSUInteger index, BOOL *stop) {
                 
                 if (result == nil) {
                     @synchronized(self.synchronizationObject) {

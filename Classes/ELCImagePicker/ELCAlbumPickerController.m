@@ -11,6 +11,7 @@
 #import <MobileCoreServices/UTCoreTypes.h>
 #import <Photos/Photos.h>
 #import "ELCConstants.h"
+#import "ELCConsole.h"
 
 
 @interface ELCAlbumPickerController () <PHPhotoLibraryChangeObserver>
@@ -134,6 +135,8 @@ static CGSize const kAlbumThumbnailSize1 = {70.0f , 70.0f};
         {
             PHFetchOptions *options = [[PHFetchOptions alloc] init];
             options.predicate = [NSPredicate predicateWithFormat:@"mediaType in %@", @[@(PHAssetMediaTypeImage)]];
+            options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate"
+                                                                      ascending:[[ELCConsole mainConsole] sortImagesAscendingByDates]]];
             PHAssetCollection *assetCollection = (PHAssetCollection *)collection;
             
             //Albums collections are allways PHAssetCollectionType=1 & PHAssetCollectionSubtype=2
