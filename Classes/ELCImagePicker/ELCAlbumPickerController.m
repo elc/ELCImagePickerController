@@ -117,39 +117,65 @@ static CGSize const kAlbumThumbnailSize1 = {70.0f , 70.0f};
     
     [self.assetGroups removeAllObjects];
     
+    BOOL ascending = [[ELCConsole mainConsole] sortImagesAscendingByDates];
+    
     //Fetch PHAssetCollections:
     PHFetchOptions *options = [[PHFetchOptions alloc] init];
     options.predicate = [NSPredicate predicateWithFormat:@"mediaType in %@", @[@(PHAssetMediaTypeImage)]];
-    options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
+    options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:ascending]];
     PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsWithOptions:options];
     
     if (assetsFetchResult != nil)
         [self.assetGroups addObject:@{@"All Photos":assetsFetchResult}];
     
     
-    PHFetchResult *topLevelUserCollections = [PHCollectionList fetchTopLevelUserCollectionsWithOptions:nil];
+    PHFetchResult * topLevelUserCollections = [PHAssetCollection fetchTopLevelUserCollectionsWithOptions:nil];
     
-    for(PHCollection *collection in topLevelUserCollections)
+    [self addCollectionsToGroups:self.assetGroups
+                usingFetchResult:topLevelUserCollections
+             sortPhotosAscending:ascending];
+    
+    PHFetchResult * cloudUserCollections =
+        [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum
+                                                 subtype:PHAssetCollectionSubtypeAlbumCloudShared
+                                                 options:nil];
+    
+    [self addCollectionsToGroups:self.assetGroups
+                usingFetchResult:cloudUserCollections
+             sortPhotosAscending:ascending];
+    
+    PHFetchResult * photoStreamUserCollections =
+        [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum
+                                                 subtype:PHAssetCollectionSubtypeAlbumMyPhotoStream
+                                                 options:nil];
+    
+    [self addCollectionsToGroups:self.assetGroups
+                usingFetchResult:photoStreamUserCollections
+             sortPhotosAscending:ascending];
+    
+    [self reloadTableView];
+}
+
+- (void)addCollectionsToGroups:(NSMutableArray *)groups
+            usingFetchResult:(PHFetchResult *)fetchResult
+         sortPhotosAscending:(BOOL)ascending {
+    for(PHCollection * collection in fetchResult)
     {
         if ([collection isKindOfClass:[PHAssetCollection class]])
         {
             PHFetchOptions *options = [[PHFetchOptions alloc] init];
             options.predicate = [NSPredicate predicateWithFormat:@"mediaType in %@", @[@(PHAssetMediaTypeImage)]];
             options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate"
-                                                                      ascending:[[ELCConsole mainConsole] sortImagesAscendingByDates]]];
+                                                                      ascending:ascending]];
             PHAssetCollection *assetCollection = (PHAssetCollection *)collection;
             
             //Albums collections are allways PHAssetCollectionType=1 & PHAssetCollectionSubtype=2
             
             PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:assetCollection options:options];
             [self.assetGroups addObject:@{collection.localizedTitle : assetsFetchResult}];
-            
         }
     }
-
-    [self reloadTableView];
 }
-
 
 - (void)viewWillAppear:(BOOL)animated {
     
@@ -273,6 +299,7 @@ static CGSize const kAlbumThumbnailSize1 = {70.0f , 70.0f};
             
             // Download from cloud if necessary
             options.networkAccessAllowed = YES;
+            options.deliveryMode = PHImageRequestOptionsDeliveryModeFastFormat;
             options.progressHandler = ^(double progress, NSError *error, BOOL *stop, NSDictionary *info) {
                 
             };
@@ -284,7 +311,8 @@ static CGSize const kAlbumThumbnailSize1 = {70.0f , 70.0f};
                                       resultHandler:^(UIImage *result, NSDictionary *info)
              {
                  if(cell.tag == currentTag) {
-                     cell.imageView.image = [self resize:result to:CGSizeMake(78, 78)];
+                     cell.imageView.image = [result copy];
+                     [cell setNeedsLayout];
                  }
              }];
         }else {
