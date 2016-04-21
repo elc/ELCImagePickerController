@@ -9,12 +9,19 @@
 #import "ELCImagePickerController.h"
 #import "ELCAssetTablePicker.h"
 #import <MobileCoreServices/UTCoreTypes.h>
+#import <Photos/Photos.h>
+#import "ELCConstants.h"
+#import "ELCConsole.h"
 
-@interface ELCAlbumPickerController ()
+
+@interface ELCAlbumPickerController () <PHPhotoLibraryChangeObserver>
 
 @property (nonatomic, strong) ALAssetsLibrary *library;
+@property (strong) PHCachingImageManager *imageManager;
 
 @end
+
+static CGSize const kAlbumThumbnailSize1 = {70.0f , 70.0f};
 
 @implementation ELCAlbumPickerController
 
@@ -38,69 +45,161 @@
     
     ALAssetsLibrary *assetLibrary = [[ALAssetsLibrary alloc] init];
     self.library = assetLibrary;
+    
+    self.imageManager = [[PHCachingImageManager alloc] init];
 
     // Load Albums into assetGroups
-    dispatch_async(dispatch_get_main_queue(), ^
-    {
-        @autoreleasepool {
-        
-        // Group enumerator Block
-            void (^assetGroupEnumerator)(ALAssetsGroup *, BOOL *) = ^(ALAssetsGroup *group, BOOL *stop) 
-            {
-                if (group == nil) {
-                    return;
-                }
-                
-                // added fix for camera albums order
-                NSString *sGroupPropertyName = (NSString *)[group valueForProperty:ALAssetsGroupPropertyName];
-                NSUInteger nType = [[group valueForProperty:ALAssetsGroupPropertyType] intValue];
-                
-                if ([[sGroupPropertyName lowercaseString] isEqualToString:@"camera roll"] && nType == ALAssetsGroupSavedPhotos) {
-                    [self.assetGroups insertObject:group atIndex:0];
-                }
-                else {
-                    [self.assetGroups addObject:group];
-                }
-
-                // Reload albums
-                [self performSelectorOnMainThread:@selector(reloadTableView) withObject:nil waitUntilDone:YES];
-            };
+    if(!IS_IOS8) {
+        dispatch_async(dispatch_get_main_queue(), ^
+        {
+            @autoreleasepool {
             
-            // Group Enumerator Failure Block
-            void (^assetGroupEnumberatorFailure)(NSError *) = ^(NSError *error) {
-              
-                if ([ALAssetsLibrary authorizationStatus] == ALAuthorizationStatusDenied) {
-                    NSString *errorMessage = NSLocalizedString(@"This app does not have access to your photos or videos. You can enable access in Privacy Settings.", nil);
-                    [[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Access Denied", nil) message:errorMessage delegate:nil cancelButtonTitle:NSLocalizedString(@"Ok", nil) otherButtonTitles:nil] show];
-                  
-                } else {
-                    NSString *errorMessage = [NSString stringWithFormat:@"Album Error: %@ - %@", [error localizedDescription], [error localizedRecoverySuggestion]];
-                    [[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Error", nil) message:errorMessage delegate:nil cancelButtonTitle:NSLocalizedString(@"Ok", nil) otherButtonTitles:nil] show];
-                }
-
-                [self.navigationItem setTitle:nil];
-                NSLog(@"A problem occured %@", [error description]);	                                 
-            };	
+            // Group enumerator Block
+                
+                void (^assetGroupEnumerator)(ALAssetsGroup *, BOOL *) = ^(ALAssetsGroup *group, BOOL *stop) 
+                {
+                    if (group == nil) {
+                        return;
+                    }
                     
-            // Enumerate Albums
-            [self.library enumerateGroupsWithTypes:ALAssetsGroupAll
-                                   usingBlock:assetGroupEnumerator 
-                                 failureBlock:assetGroupEnumberatorFailure];
-        
-        }
-    });
+                    // added fix for camera albums order
+                    NSString *sGroupPropertyName = (NSString *)[group valueForProperty:ALAssetsGroupPropertyName];
+                    NSUInteger nType = [[group valueForProperty:ALAssetsGroupPropertyType] intValue];
+                    
+                    if ([[sGroupPropertyName lowercaseString] isEqualToString:@"camera roll"] && nType == ALAssetsGroupSavedPhotos) {
+                        [self.assetGroups insertObject:group atIndex:0];
+                    }
+                    else {
+                        [self.assetGroups addObject:group];
+                    }
+
+                    // Reload albums
+                    [self performSelectorOnMainThread:@selector(reloadTableView) withObject:nil waitUntilDone:YES];
+                };
+                
+                // Group Enumerator Failure Block
+                void (^assetGroupEnumberatorFailure)(NSError *) = ^(NSError *error) {
+                  
+                    if ([ALAssetsLibrary authorizationStatus] == ALAuthorizationStatusDenied) {
+                        NSString *errorMessage = NSLocalizedString(@"This app does not have access to your photos or videos. You can enable access in Privacy Settings.", nil);
+                        [[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Access Denied", nil) message:errorMessage delegate:nil cancelButtonTitle:NSLocalizedString(@"Ok", nil) otherButtonTitles:nil] show];
+                      
+                    } else {
+                        NSString *errorMessage = [NSString stringWithFormat:@"Album Error: %@ - %@", [error localizedDescription], [error localizedRecoverySuggestion]];
+                        [[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Error", nil) message:errorMessage delegate:nil cancelButtonTitle:NSLocalizedString(@"Ok", nil) otherButtonTitles:nil] show];
+                    }
+
+                    [self.navigationItem setTitle:nil];
+                    NSLog(@"A problem occured %@", [error description]);	                                 
+                };	
+                        
+                // Enumerate Albums
+                
+                [self.library enumerateGroupsWithTypes:ALAssetsGroupAll
+                                       usingBlock:assetGroupEnumerator
+                                      failureBlock:assetGroupEnumberatorFailure];
+
+            }
+        });
+    } else {
+//        //if ios 8 and above
+        NSLog(@"authorization status %li", (long)[PHPhotoLibrary authorizationStatus]);
+        [[PHPhotoLibrary sharedPhotoLibrary] registerChangeObserver:self];
+//        [self updateFetchResults];
+    }
+}
+
+-(void)updateFetchResults
+{
+    //What I do here is fetch both the albums list and the assets of each album.
+    //This way I have acces to the number of items in each album, I can load the 3
+    //thumbnails directly and I can pass the fetched result to the gridViewController.
     
+    [self.assetGroups removeAllObjects];
+    
+    BOOL ascending = [[ELCConsole mainConsole] sortImagesAscendingByDates];
+    
+    //Fetch PHAssetCollections:
+    PHFetchOptions *options = [[PHFetchOptions alloc] init];
+    options.predicate = [NSPredicate predicateWithFormat:@"mediaType in %@", @[@(PHAssetMediaTypeImage)]];
+    options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:ascending]];
+    PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsWithOptions:options];
+    
+    if (assetsFetchResult != nil)
+        [self.assetGroups addObject:@{@"All Photos":assetsFetchResult}];
+    
+    
+    PHFetchResult * topLevelUserCollections = [PHAssetCollection fetchTopLevelUserCollectionsWithOptions:nil];
+    
+    [self addCollectionsToGroups:self.assetGroups
+                usingFetchResult:topLevelUserCollections
+             sortPhotosAscending:ascending];
+    
+    PHFetchResult * cloudUserCollections =
+        [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum
+                                                 subtype:PHAssetCollectionSubtypeAlbumCloudShared
+                                                 options:nil];
+    
+    [self addCollectionsToGroups:self.assetGroups
+                usingFetchResult:cloudUserCollections
+             sortPhotosAscending:ascending];
+    
+    PHFetchResult * photoStreamUserCollections =
+        [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum
+                                                 subtype:PHAssetCollectionSubtypeAlbumMyPhotoStream
+                                                 options:nil];
+    
+    [self addCollectionsToGroups:self.assetGroups
+                usingFetchResult:photoStreamUserCollections
+             sortPhotosAscending:ascending];
+    
+    [self reloadTableView];
+}
+
+- (void)addCollectionsToGroups:(NSMutableArray *)groups
+            usingFetchResult:(PHFetchResult *)fetchResult
+         sortPhotosAscending:(BOOL)ascending {
+    for(PHCollection * collection in fetchResult)
+    {
+        if ([collection isKindOfClass:[PHAssetCollection class]])
+        {
+            PHFetchOptions *options = [[PHFetchOptions alloc] init];
+            options.predicate = [NSPredicate predicateWithFormat:@"mediaType in %@", @[@(PHAssetMediaTypeImage)]];
+            options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate"
+                                                                      ascending:ascending]];
+            PHAssetCollection *assetCollection = (PHAssetCollection *)collection;
+            
+            //Albums collections are allways PHAssetCollectionType=1 & PHAssetCollectionSubtype=2
+            
+            PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:assetCollection options:options];
+            [self.assetGroups addObject:@{collection.localizedTitle : assetsFetchResult}];
+        }
+    }
 }
 
 - (void)viewWillAppear:(BOOL)animated {
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadTableView) name:ALAssetsLibraryChangedNotification object:nil];
+    if(!IS_IOS8) {
+         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadTableView) name:ALAssetsLibraryChangedNotification object:nil];
+    }else {
+        //if ios 8 and above
+        [self updateFetchResults];
+        
+    }
+    
+   
     [self.tableView reloadData];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
-    
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:ALAssetsLibraryChangedNotification object:nil];
+    if(!IS_IOS8) {
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:ALAssetsLibraryChangedNotification object:nil];
+    }
+}
+
+- (void)dealloc
+{
+    [[PHPhotoLibrary sharedPhotoLibrary] unregisterChangeObserver:self];
 }
 
 - (void)reloadTableView
@@ -167,17 +266,60 @@
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
     }
     
-    // Get count
-    ALAssetsGroup *g = (ALAssetsGroup*)[self.assetGroups objectAtIndex:indexPath.row];
-    [g setAssetsFilter:[self assetFilter]];
-    NSInteger gCount = [g numberOfAssets];
+    // Increment the cell's tag
+    NSInteger currentTag = cell.tag + 1;
+    cell.tag = currentTag;
     
-    cell.textLabel.text = [NSString stringWithFormat:@"%@ (%ld)",[g valueForProperty:ALAssetsGroupPropertyName], (long)gCount];
-    UIImage* image = [UIImage imageWithCGImage:[g posterImage]];
-    image = [self resize:image to:CGSizeMake(78, 78)];
-    [cell.imageView setImage:image];
-	[cell setAccessoryType:UITableViewCellAccessoryDisclosureIndicator];
-	
+//    if(indexPath.row == 0) {
+    
+//        ALAssetsGroup *g = (ALAssetsGroup*)[self.assetGroups objectAtIndex:indexPath.row-1];
+//        [g setAssetsFilter:[self assetFilter]];
+//        NSInteger gCount = [g numberOfAssets];
+//        
+//        cell.textLabel.text = [NSString stringWithFormat:@"%@ (%ld)",[g valueForProperty:ALAssetsGroupPropertyName], (long)gCount];
+//        UIImage* image = [UIImage imageWithCGImage:[g posterImage]];
+//        image = [self resize:image to:CGSizeMake(78, 78)];
+//        [cell.imageView setImage:image];
+//        [cell setAccessoryType:UITableViewCellAccessoryDisclosureIndicator];
+        
+        
+        // } else {         if ios 8 and above
+        NSDictionary *currentFetchResultRecord = [self.assetGroups objectAtIndex:indexPath.row];
+        PHFetchResult *assetsFetchResult = [currentFetchResultRecord allValues][0];
+        cell.textLabel.text = [NSString stringWithFormat:@"%@ %lu", [currentFetchResultRecord allKeys][0],(unsigned long)assetsFetchResult.count];
+        if([assetsFetchResult count]>0)
+        {
+            CGFloat scale = [UIScreen mainScreen].scale;
+            
+            //Compute the thumbnail pixel size:
+            CGSize tableCellThumbnailSize1 = CGSizeMake(kAlbumThumbnailSize1.width*scale, kAlbumThumbnailSize1.height*scale);
+            PHAsset *asset = assetsFetchResult[0];
+            
+            PHImageRequestOptions *options = [[PHImageRequestOptions alloc] init];
+            
+            // Download from cloud if necessary
+            options.networkAccessAllowed = YES;
+            options.deliveryMode = PHImageRequestOptionsDeliveryModeFastFormat;
+            options.progressHandler = ^(double progress, NSError *error, BOOL *stop, NSDictionary *info) {
+                
+            };
+            
+            [self.imageManager requestImageForAsset:asset
+                                         targetSize:tableCellThumbnailSize1
+                                        contentMode:PHImageContentModeAspectFill
+                                            options:options
+                                      resultHandler:^(UIImage *result, NSDictionary *info)
+             {
+                 if(cell.tag == currentTag) {
+                     cell.imageView.image = [result copy];
+                     [cell setNeedsLayout];
+                 }
+             }];
+        }else {
+            cell.imageView.image = nil;
+        }
+        
+
     return cell;
 }
 
@@ -201,9 +343,13 @@
 	ELCAssetTablePicker *picker = [[ELCAssetTablePicker alloc] initWithNibName: nil bundle: nil];
 	picker.parent = self;
 
-    picker.assetGroup = [self.assetGroups objectAtIndex:indexPath.row];
-    [picker.assetGroup setAssetsFilter:[self assetFilter]];
     
+    if(!IS_IOS8) {
+        picker.assetGroup = [self.assetGroups objectAtIndex:indexPath.row];
+        [((ALAssetsGroup *)picker.assetGroup) setAssetsFilter:[self assetFilter]];
+    }else {
+        picker.assetGroup = [[self.assetGroups objectAtIndex:indexPath.row] allValues][0];
+    }
 	picker.assetPickerFilterDelegate = self.assetPickerFilterDelegate;
 	
 	[self.navigationController pushViewController:picker animated:YES];
@@ -214,5 +360,35 @@
 	return 95;
 }
 
+
+#pragma mark - Photos Observer
+
+- (void)photoLibraryDidChange:(PHChange *)changeInstance
+{
+    // Call might come on any background queue. Re-dispatch to the main queue to handle it.
+    dispatch_async(dispatch_get_main_queue(), ^{
+        
+        NSMutableArray *updatedCollectionsFetchResults = nil;
+        
+        for (NSDictionary *fetchResultDictionary in self.assetGroups) {
+            PHFetchResult *collectionsFetchResult = [fetchResultDictionary allValues][0];
+            PHFetchResultChangeDetails *changeDetails = [changeInstance changeDetailsForFetchResult:collectionsFetchResult];
+            if (changeDetails) {
+                
+                if (!updatedCollectionsFetchResults) {
+                    updatedCollectionsFetchResults = [self.assetGroups mutableCopy];
+                }
+                
+                [updatedCollectionsFetchResults replaceObjectAtIndex:[self.assetGroups indexOfObject:fetchResultDictionary] withObject:@{[fetchResultDictionary allKeys][0] :[changeDetails fetchResultAfterChanges]}];
+            }
+        }
+        
+        if (updatedCollectionsFetchResults) {
+            self.assetGroups = updatedCollectionsFetchResults;
+            [self.tableView reloadData];
+        }
+        
+    });
+}
 @end
 

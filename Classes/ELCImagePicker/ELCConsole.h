@@ -13,6 +13,7 @@
     NSMutableArray *myIndex;
 }
 @property (nonatomic,assign) BOOL onOrder;
+@property (nonatomic, assign) BOOL sortImagesAscendingByDates;
 + (ELCConsole *)mainConsole;
 - (void)addIndex:(int)index;
 - (void)removeIndex:(int)index;

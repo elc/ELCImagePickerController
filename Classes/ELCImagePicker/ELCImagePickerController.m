@@ -14,8 +14,33 @@
 #import <CoreLocation/CoreLocation.h>
 #import <MobileCoreServices/UTCoreTypes.h>
 #import "ELCConsole.h"
+#import "ELCConstants.h"
+#import <Photos/Photos.h>
 
 @implementation ELCImagePickerController
+
+#pragma mark - property -
+
+- (BOOL)onOrder
+{
+    return [[ELCConsole mainConsole] onOrder];
+}
+
+- (void)setOnOrder:(BOOL)onOrder
+{
+    [[ELCConsole mainConsole] setOnOrder:onOrder];
+}
+
+- (BOOL)sortImagesAscendingByDates {
+    BOOL result = [[ELCConsole mainConsole] sortImagesAscendingByDates];
+    return result;
+}
+
+- (void)setSortImagesAscendingByDates:(BOOL)sortImagesAscendingByDates {
+    [[ELCConsole mainConsole] setSortImagesAscendingByDates:sortImagesAscendingByDates];
+}
+
+#pragma mark - life cycle -
 
 //Using auto synthesizers
 
@@ -90,50 +115,60 @@
 - (void)selectedAssets:(NSArray *)assets
 {
 	NSMutableArray *returnArray = [[NSMutableArray alloc] init];
-	
-	for(ELCAsset *elcasset in assets) {
-        ALAsset *asset = elcasset.asset;
-		id obj = [asset valueForProperty:ALAssetPropertyType];
-		if (!obj) {
-			continue;
-		}
-		NSMutableDictionary *workingDictionary = [[NSMutableDictionary alloc] init];
-		
-		CLLocation* wgs84Location = [asset valueForProperty:ALAssetPropertyLocation];
-		if (wgs84Location) {
-			[workingDictionary setObject:wgs84Location forKey:ALAssetPropertyLocation];
-		}
-        
-        [workingDictionary setObject:obj forKey:UIImagePickerControllerMediaType];
-
-        //This method returns nil for assets from a shared photo stream that are not yet available locally. If the asset becomes available in the future, an ALAssetsLibraryChangedNotification notification is posted.
-        ALAssetRepresentation *assetRep = [asset defaultRepresentation];
-
-        if(assetRep != nil) {
-            if (_returnsImage) {
-                CGImageRef imgRef = nil;
-                //defaultRepresentation returns image as it appears in photo picker, rotated and sized,
-                //so use UIImageOrientationUp when creating our image below.
-                UIImageOrientation orientation = UIImageOrientationUp;
-            
-                if (_returnsOriginalImage) {
-                    imgRef = [assetRep fullResolutionImage];
-                    orientation = [assetRep orientation];
-                } else {
-                    imgRef = [assetRep fullScreenImage];
-                }
-                UIImage *img = [UIImage imageWithCGImage:imgRef
-                                                   scale:1.0f
-                                             orientation:orientation];
-                [workingDictionary setObject:img forKey:UIImagePickerControllerOriginalImage];
+    if(!IS_IOS8) {
+        for(ELCAsset *elcasset in assets) {
+            ALAsset *asset = (ALAsset*)elcasset.asset;
+            id obj = [asset valueForProperty:ALAssetPropertyType];
+            if (!obj) {
+                continue;
             }
-
-            [workingDictionary setObject:[[asset valueForProperty:ALAssetPropertyURLs] valueForKey:[[[asset valueForProperty:ALAssetPropertyURLs] allKeys] objectAtIndex:0]] forKey:UIImagePickerControllerReferenceURL];
+            NSMutableDictionary *workingDictionary = [[NSMutableDictionary alloc] init];
             
-            [returnArray addObject:workingDictionary];
+            CLLocation* wgs84Location = [asset valueForProperty:ALAssetPropertyLocation];
+            if (wgs84Location) {
+                [workingDictionary setObject:wgs84Location forKey:ALAssetPropertyLocation];
+            }
+            
+            [workingDictionary setObject:obj forKey:UIImagePickerControllerMediaType];
+
+            //This method returns nil for assets from a shared photo stream that are not yet available locally. If the asset becomes available in the future, an ALAssetsLibraryChangedNotification notification is posted.
+            ALAssetRepresentation *assetRep = [asset defaultRepresentation];
+
+            if(assetRep != nil) {
+                if (_returnsImage) {
+                    CGImageRef imgRef = nil;
+                    //defaultRepresentation returns image as it appears in photo picker, rotated and sized,
+                    //so use UIImageOrientationUp when creating our image below.
+                    UIImageOrientation orientation = UIImageOrientationUp;
+                
+                    if (_returnsOriginalImage) {
+                        imgRef = [assetRep fullResolutionImage];
+                        
+                         NSNumber *orientationValue = [asset valueForProperty:@"ALAssetPropertyOrientation"];
+                        if (orientationValue != nil) {
+                            orientation = [orientationValue intValue];
+                        }
+                        
+                    } else {
+                        imgRef = [assetRep fullScreenImage];
+                    }
+                    UIImage *img = [UIImage imageWithCGImage:imgRef
+                                                       scale:1.0f
+                                                 orientation:orientation];
+                    [workingDictionary setObject:img forKey:UIImagePickerControllerOriginalImage];
+                }
+
+                [workingDictionary setObject:[[asset valueForProperty:ALAssetPropertyURLs] valueForKey:[[[asset valueForProperty:ALAssetPropertyURLs] allKeys] objectAtIndex:0]] forKey:UIImagePickerControllerReferenceURL];
+                
+                [returnArray addObject:workingDictionary];
+            }
+            
         }
-		
-	}    
+    }else {
+        for(ELCAsset *elcasset in assets) {
+            [returnArray addObject:elcasset.asset];
+        }
+    }
 	if (_imagePickerDelegate != nil && [_imagePickerDelegate respondsToSelector:@selector(elcImagePickerController:didFinishPickingMediaWithInfo:)]) {
 		[_imagePickerDelegate performSelector:@selector(elcImagePickerController:didFinishPickingMediaWithInfo:) withObject:self withObject:returnArray];
 	} else {
@@ -148,16 +183,6 @@
     } else {
         return toInterfaceOrientation != UIInterfaceOrientationPortraitUpsideDown;
     }
-}
-
-- (BOOL)onOrder
-{
-    return [[ELCConsole mainConsole] onOrder];
-}
-
-- (void)setOnOrder:(BOOL)onOrder
-{
-    [[ELCConsole mainConsole] setOnOrder:onOrder];
 }
 
 @end

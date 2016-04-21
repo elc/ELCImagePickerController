@@ -1,6 +1,7 @@
-# ELCImagePickerController
+# ELCImagePickerController with Photos Library and iCloud sync support
 
-*A clone of the UIImagePickerController using the Assets Library Framework allowing for multiple asset selection.*
+*A clone of the UIImagePickerController using Assets Library Framework allowing for multiple asset selection.*
+*Updated for the Photos Library to support iCloud sync from iOS 8 onwards.* 
 
 ## Usage
 
@@ -22,7 +23,7 @@ elcPicker.imagePickerDelegate = self;
 [elcPicker release];
 ```
 
-The `ELCImagePickerController` will return the select images back to the `ELCImagePickerControllerDelegate`. The delegate contains methods very similar to the `UIImagePickerControllerDelegate`. Instead of returning one dictionary representing a single image the controller sends back an array of similarly structured dictionaries. The two delegate methods are:
+The `ELCImagePickerController` will return the select images back to the `ELCImagePickerControllerDelegate`. The delegate contains methods very similar to the `UIImagePickerControllerDelegate`. Instead of returning one dictionary representing a single image the controller sends back an array of PHAsset for iOS 8, 9 and similarly structured dictionaries for iOS 7,6. The two delegate methods are:
 
 ```obj-c
 - (void)elcImagePickerController:(ELCImagePickerController *)picker didFinishPickingMediaWithInfo:(NSArray *)info;

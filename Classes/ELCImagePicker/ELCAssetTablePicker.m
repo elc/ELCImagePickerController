@@ -10,10 +10,15 @@
 #import "ELCAsset.h"
 #import "ELCAlbumPickerController.h"
 #import "ELCConsole.h"
+#import "ELCConstants.h"
+#import <Photos/Photos.h>
 
-@interface ELCAssetTablePicker ()
+
+@interface ELCAssetTablePicker () <PHPhotoLibraryChangeObserver>
 
 @property (nonatomic, assign) int columns;
+@property (strong, nonatomic) id synchronizationObject;
+@property (assign, nonatomic, getter=isProcessing) BOOL processing;
 
 @end
 
@@ -47,24 +52,36 @@
         [self.navigationItem setRightBarButtonItem:doneButtonItem];
         [self.navigationItem setTitle:NSLocalizedString(@"Loading...", nil)];
     }
-
-	[self performSelectorInBackground:@selector(preparePhotos) withObject:nil];
     
     // Register for notifications when the photo library has changed
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(preparePhotos) name:ALAssetsLibraryChangedNotification object:nil];
+    if(!IS_IOS8){
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(preparePhotos) name:ALAssetsLibraryChangedNotification object:nil];
+    }else {
+        [[PHPhotoLibrary sharedPhotoLibrary] registerChangeObserver:self];
+    }
+    
+    [self performSelectorInBackground:@selector(preparePhotos) withObject:nil];
 }
 
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+    [[ELCConsole mainConsole] removeAllIndex];
     self.columns = self.view.bounds.size.width / 80;
+    [self performSelectorInBackground:@selector(processPhotos) withObject:nil];
 }
 
 - (void)viewWillDisappear:(BOOL)animated
 {
     [super viewWillDisappear:animated];
     [[ELCConsole mainConsole] removeAllIndex];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:ALAssetsLibraryChangedNotification object:nil];
+    
+    if (!IS_IOS8) {
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:ALAssetsLibraryChangedNotification object:nil];
+    }else {
+        [[PHPhotoLibrary sharedPhotoLibrary] unregisterChangeObserver:self];
+    }
+
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
@@ -81,46 +98,108 @@
 
 - (void)preparePhotos
 {
+    [self performSelectorInBackground:@selector(processPhotos) withObject:nil];
+}
+
+- (void)processPhotos
+{
+    @synchronized(self.synchronizationObject) {
+        if (self.processing) {
+            return;
+        }
+        self.processing = YES;
+    }
+    
     @autoreleasepool {
-        
         [self.elcAssets removeAllObjects];
-        [self.assetGroup enumerateAssetsUsingBlock:^(ALAsset *result, NSUInteger index, BOOL *stop) {
-            
-            if (result == nil) {
-                return;
+        [[ELCConsole mainConsole] removeAllIndex];
+        if (!IS_IOS8) {
+            NSEnumerationOptions options = NSEnumerationReverse;
+            if ([[ELCConsole mainConsole] sortImagesAscendingByDates]) {
+                options = 0;
             }
-            
-            ELCAsset *elcAsset = [[ELCAsset alloc] initWithAsset:result];
-            [elcAsset setParent:self];
-            
-            BOOL isAssetFiltered = NO;
-            if (self.assetPickerFilterDelegate &&
-               [self.assetPickerFilterDelegate respondsToSelector:@selector(assetTablePicker:isAssetFilteredOut:)])
-            {
-                isAssetFiltered = [self.assetPickerFilterDelegate assetTablePicker:self isAssetFilteredOut:(ELCAsset*)elcAsset];
-            }
+            [((ALAssetsGroup *)self.assetGroup) enumerateAssetsWithOptions:options
+                                                                usingBlock:^(ALAsset *result, NSUInteger index, BOOL *stop) {
+                
+                if (result == nil) {
+                    @synchronized(self.synchronizationObject) {
+                        self.processing = NO;
+                    }
+                    return;
+                }
+                
+                ELCAsset *elcAsset = [[ELCAsset alloc] initWithAsset:result];
+                [elcAsset setParent:self];
+                
+                BOOL isAssetFiltered = NO;
+                if (self.assetPickerFilterDelegate &&
+                   [self.assetPickerFilterDelegate respondsToSelector:@selector(assetTablePicker:isAssetFilteredOut:)])
+                {
+                    isAssetFiltered = [self.assetPickerFilterDelegate assetTablePicker:self isAssetFilteredOut:(ELCAsset*)elcAsset];
+                }
 
-            if (!isAssetFiltered) {
-                [self.elcAssets addObject:elcAsset];
-            }
+                if (!isAssetFiltered) {
+                    [self.elcAssets addObject:elcAsset];
+                }
 
-         }];
+             }];
 
-        dispatch_sync(dispatch_get_main_queue(), ^{
-            [self.tableView reloadData];
-            // scroll to bottom
-            long section = [self numberOfSectionsInTableView:self.tableView] - 1;
-            long row = [self tableView:self.tableView numberOfRowsInSection:section] - 1;
-            if (section >= 0 && row >= 0) {
-                NSIndexPath *ip = [NSIndexPath indexPathForRow:row
-                                                     inSection:section];
-                        [self.tableView scrollToRowAtIndexPath:ip
-                                              atScrollPosition:UITableViewScrollPositionBottom
-                                                      animated:NO];
+            dispatch_sync(dispatch_get_main_queue(), ^{
+                [self.tableView reloadData];
+//                // scroll to bottom
+//                long section = [self numberOfSectionsInTableView:self.tableView] - 1;
+//                long row = [self tableView:self.tableView numberOfRowsInSection:section] - 1;
+//                if (section >= 0 && row >= 0) {
+//                    NSIndexPath *ip = [NSIndexPath indexPathForRow:row
+//                                                         inSection:section];
+//                            [self.tableView scrollToRowAtIndexPath:ip
+//                                                  atScrollPosition:UITableViewScrollPositionBottom
+//                                                          animated:NO];
+//                }
+                
+                [self.navigationItem setTitle:self.singleSelection ? NSLocalizedString(@"Pick Photo", nil) : NSLocalizedString(@"Pick Photos", nil)];
+            });
+        }else {
+            PHFetchResult *tempFetchResult = (PHFetchResult *)self.assetGroup;
+            for (int k =0; k < tempFetchResult.count; k++) {
+                PHAsset *asset = tempFetchResult[k];
+                ELCAsset *elcAsset = [[ELCAsset alloc] initWithAsset:asset];
+                [elcAsset setParent:self];
+                
+                BOOL isAssetFiltered = NO;
+                if (self.assetPickerFilterDelegate &&
+                    [self.assetPickerFilterDelegate respondsToSelector:@selector(assetTablePicker:isAssetFilteredOut:)])
+                {
+                    isAssetFiltered = [self.assetPickerFilterDelegate assetTablePicker:self isAssetFilteredOut:(ELCAsset*)elcAsset];
+                }
+                
+                if (!isAssetFiltered) {
+                    [self.elcAssets addObject:elcAsset];
+                }
             }
             
-            [self.navigationItem setTitle:self.singleSelection ? NSLocalizedString(@"Pick Photo", nil) : NSLocalizedString(@"Pick Photos", nil)];
-        });
+
+            @synchronized(self.synchronizationObject) {
+                self.processing = NO;
+            }
+            
+            
+            dispatch_sync(dispatch_get_main_queue(), ^{
+                [self.tableView reloadData];
+                // scroll to bottom
+//                long section = [self numberOfSectionsInTableView:self.tableView] - 1;
+//                long row = [self tableView:self.tableView numberOfRowsInSection:section] - 1;
+//                if (section >= 0 && row >= 0) {
+//                    NSIndexPath *ip = [NSIndexPath indexPathForRow:row
+//                                                         inSection:section];
+//                    [self.tableView scrollToRowAtIndexPath:ip
+//                                          atScrollPosition:UITableViewScrollPositionBottom
+//                                                  animated:NO];
+//                }
+                
+                [self.navigationItem setTitle:self.singleSelection ? NSLocalizedString(@"Pick Photo", nil) : NSLocalizedString(@"Pick Photos", nil)];
+            });
+        }
     }
 }
 
@@ -231,9 +310,7 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    if (self.columns <= 0) { //Sometimes called before we know how many columns we have
-        self.columns = 4;
-    }
+
     NSInteger numRows = ceil([self.elcAssets count] / (float)self.columns);
     return numRows;
 }
@@ -242,7 +319,11 @@
 {
     long index = path.row * self.columns;
     long length = MIN(self.columns, [self.elcAssets count] - index);
-    return [self.elcAssets subarrayWithRange:NSMakeRange(index, length)];
+    NSRange subarrayRange = NSMakeRange(index, length);
+    if (NSMaxRange(subarrayRange) > self.elcAssets.count) {
+        return nil;
+    }
+    return [self.elcAssets subarrayWithRange:subarrayRange];
 }
 
 // Customize the appearance of table view cells.
@@ -277,6 +358,28 @@
 	}
     
     return count;
+}
+
+#pragma mark - Photo Library Observer 
+
+-(void)photoLibraryDidChange:(PHChange *)changeInstance {
+    PHFetchResultChangeDetails *changeDetails = [changeInstance changeDetailsForFetchResult:(PHFetchResult*)self.assetGroup];
+    
+    if(changeDetails) {
+        self.assetGroup = [changeDetails fetchResultAfterChanges];
+        [self preparePhotos];
+    }
+}
+
+#pragma mark - Property -
+
+#pragma mark Lazy loading
+
+- (id)synchronizationObject {
+    if (_synchronizationObject == nil) {
+        _synchronizationObject = [NSObject new];
+    }
+    return _synchronizationObject;
 }
 
 
