@@ -69,7 +69,8 @@
             overlayView.labIndex.text = [NSString stringWithFormat:@"%d", asset.index + 1];
         } else {
             if (overlayImage == nil) {
-                overlayImage = [UIImage imageNamed:@"Overlay.png"];
+                NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+                overlayImage = [UIImage imageNamed:@"Overlay.png" inBundle:bundle compatibleWithTraitCollection:nil];
             }
             ELCOverlayImageView *overlayView = [[ELCOverlayImageView alloc] initWithImage:overlayImage];
             [_overlayViewArray addObject:overlayView];
