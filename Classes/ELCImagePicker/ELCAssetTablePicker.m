@@ -91,7 +91,7 @@
         [self.elcAssets removeAllObjects];
         
         PHFetchOptions *assetsFilter = [[PHFetchOptions alloc] init];
-        // filter out slow motion videos, as they require a more complex way of processing. Not worth doing now
+        // Filter out slow motion videos as processign them through PhotoKit is non-trivial
         assetsFilter.predicate = [ELCAsset slowmoFilterPredicate];
         
         PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:self.assetGroup options:assetsFilter];
