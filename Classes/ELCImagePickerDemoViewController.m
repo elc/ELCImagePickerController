@@ -9,11 +9,12 @@
 #import "ELCImagePickerDemoAppDelegate.h"
 #import "ELCImagePickerDemoViewController.h"
 #import <MobileCoreServices/UTCoreTypes.h>
+#import <Photos/Photos.h>
 
 
 @interface ELCImagePickerDemoViewController ()
 
-@property (nonatomic, strong) ALAssetsLibrary *specialLibrary;
+@property (nonatomic, strong) PHFetchResult *specialLibrary;
 
 @end
 
@@ -38,28 +39,20 @@
 
 - (IBAction)launchSpecialController
 {
-    ALAssetsLibrary *library = [[ALAssetsLibrary alloc] init];
-    self.specialLibrary = library;
-    NSMutableArray *groups = [NSMutableArray array];
-    [_specialLibrary enumerateGroupsWithTypes:ALAssetsGroupSavedPhotos usingBlock:^(ALAssetsGroup *group, BOOL *stop) {
-        if (group) {
-            [groups addObject:group];
-        } else {
-            // this is the end
-            [self displayPickerForGroup:[groups objectAtIndex:0]];
-        }
-    } failureBlock:^(NSError *error) {
-        self.chosenImages = nil;
-        UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Error" message:[NSString stringWithFormat:@"Album Error: %@ - %@", [error localizedDescription], [error localizedRecoverySuggestion]] delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil];
-        [alert show];
-        
-        NSLog(@"A problem occured %@", [error description]);
-        // an error here means that the asset groups were inaccessable.
-        // Maybe the user or system preferences refused access.
-    }];
+    PHFetchResult *smartAlbums = [PHAssetCollection       fetchAssetCollectionsWithType:PHAssetCollectionTypeMoment
+                                                                                subtype:PHAssetCollectionSubtypeAlbumRegular options:nil];
+    self.specialLibrary = smartAlbums;
+    
+    NSMutableArray *groups = [NSMutableArray new];
+    for (int i = 0; i < smartAlbums.count; i++) {
+        [groups addObject:smartAlbums[i]];
+    }
+    if (groups.count > 0) {
+        [self displayPickerForGroup:[groups objectAtIndex:0]];
+    }
 }
 
-- (void)displayPickerForGroup:(ALAssetsGroup *)group
+- (void)displayPickerForGroup:(PHAssetCollection *)group
 {
 	ELCAssetTablePicker *tablePicker = [[ELCAssetTablePicker alloc] initWithStyle:UITableViewStylePlain];
     tablePicker.singleSelection = YES;
@@ -75,7 +68,7 @@
     
     // Move me
     tablePicker.assetGroup = group;
-    [tablePicker.assetGroup setAssetsFilter:[ALAssetsFilter allAssets]];
+//    [tablePicker.assetGroup setAssetsFilter:[ALAssetsFilter allAssets]];
     
     [self presentViewController:elcPicker animated:YES completion:nil];
 }
@@ -104,7 +97,8 @@
     
     NSMutableArray *images = [NSMutableArray arrayWithCapacity:[info count]];
 	for (NSDictionary *dict in info) {
-        if ([dict objectForKey:UIImagePickerControllerMediaType] == ALAssetTypePhoto){
+        NSNumber *mediaType = [dict objectForKey:UIImagePickerControllerMediaType];
+        if (mediaType.longValue == PHAssetMediaTypeImage){
             if ([dict objectForKey:UIImagePickerControllerOriginalImage]){
                 UIImage* image=[dict objectForKey:UIImagePickerControllerOriginalImage];
                 [images addObject:image];
@@ -119,7 +113,7 @@
             } else {
                 NSLog(@"UIImagePickerControllerReferenceURL = %@", dict);
             }
-        } else if ([dict objectForKey:UIImagePickerControllerMediaType] == ALAssetTypeVideo){
+        } else if (mediaType.longValue == PHAssetMediaTypeVideo){
             if ([dict objectForKey:UIImagePickerControllerOriginalImage]){
                 UIImage* image=[dict objectForKey:UIImagePickerControllerOriginalImage];
 
