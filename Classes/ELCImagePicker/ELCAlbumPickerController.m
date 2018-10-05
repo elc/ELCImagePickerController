@@ -110,7 +110,8 @@
 			void (^assetGroupEnumberatorFailure)(NSError *) = ^(NSError *error) {
 
 				if ([ALAssetsLibrary authorizationStatus] == ALAuthorizationStatusDenied) {
-					NSString *errorMessage = NSLocalizedString(@"This app does not have access to your photos or videos. You can enable access in Privacy Settings.", nil);
+					NSString *appName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleName"];
+					NSString *errorMessage = [NSString stringWithFormat:NSLocalizedString(@"This app does not have access to your photos or videos. You can enable access in Privacy Settings.", nil), appName];
 					[[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Access Denied", nil) message:errorMessage delegate:nil cancelButtonTitle:NSLocalizedString(@"Ok", nil) otherButtonTitles:nil] show];
 
 				} else {
