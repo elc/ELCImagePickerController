@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0323CC871FD460E100F08879 /* Photos.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0323CC861FD4608F00F08879 /* Photos.framework */; };
+		0323CC8B1FD46B9800F08879 /* UIAlertController+Extensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 0323CC8A1FD46B9800F08879 /* UIAlertController+Extensions.m */; };
 		0B67B05B17E0ED1F002CC2C5 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 0B67B05A17E0ED1F002CC2C5 /* Default-568h@2x.png */; };
 		1A2C100517026CF0004FAFA0 /* ELCAssetTablePicker.m in Sources */ = {isa = PBXBuildFile; fileRef = 1A2C0FFB17026CF0004FAFA0 /* ELCAssetTablePicker.m */; };
 		1A2C100617026CF0004FAFA0 /* ELCImagePickerController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1A2C0FFC17026CF0004FAFA0 /* ELCImagePickerController.m */; };
@@ -27,12 +29,14 @@
 		4AAFDA62194840F20020FCC4 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4AAFDA61194840F20020FCC4 /* MobileCoreServices.framework */; };
 		83C6BC9714476B280064D71D /* elc-ios-icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 83C6BC9514476B280064D71D /* elc-ios-icon@2x.png */; };
 		83C6BC9814476B280064D71D /* elc-ios-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 83C6BC9614476B280064D71D /* elc-ios-icon.png */; };
-		E29A5E3C1239C42A008BB149 /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E29A5E3B1239C42A008BB149 /* AssetsLibrary.framework */; };
 		F1DF7842196FA475003524A2 /* ELCConsole.m in Sources */ = {isa = PBXBuildFile; fileRef = F1DF783F196FA475003524A2 /* ELCConsole.m */; };
 		F1DF7843196FA475003524A2 /* ELCOverlayImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = F1DF7841196FA475003524A2 /* ELCOverlayImageView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0323CC861FD4608F00F08879 /* Photos.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Photos.framework; path = System/Library/Frameworks/Photos.framework; sourceTree = SDKROOT; };
+		0323CC891FD46B9800F08879 /* UIAlertController+Extensions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UIAlertController+Extensions.h"; sourceTree = "<group>"; };
+		0323CC8A1FD46B9800F08879 /* UIAlertController+Extensions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UIAlertController+Extensions.m"; sourceTree = "<group>"; };
 		0B67B05A17E0ED1F002CC2C5 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		1A2C0FFA17026CF0004FAFA0 /* ELCAssetTablePicker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ELCAssetTablePicker.h; sourceTree = "<group>"; };
 		1A2C0FFB17026CF0004FAFA0 /* ELCAssetTablePicker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ELCAssetTablePicker.m; sourceTree = "<group>"; };
@@ -78,20 +82,30 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0323CC871FD460E100F08879 /* Photos.framework in Frameworks */,
 				4AAFDA62194840F20020FCC4 /* MobileCoreServices.framework in Frameworks */,
 				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,
 				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
 				288765A50DF7441C002DB57D /* CoreGraphics.framework in Frameworks */,
-				E29A5E3C1239C42A008BB149 /* AssetsLibrary.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0323CC881FD46B6A00F08879 /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				0323CC891FD46B9800F08879 /* UIAlertController+Extensions.h */,
+				0323CC8A1FD46B9800F08879 /* UIAlertController+Extensions.m */,
+			);
+			path = Helpers;
+			sourceTree = "<group>";
+		};
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				0323CC881FD46B6A00F08879 /* Helpers */,
 				4252A0981593013500086D05 /* ELCImagePicker */,
 				1D3623240D0F684500981E51 /* ELCImagePickerDemoAppDelegate.h */,
 				1D3623250D0F684500981E51 /* ELCImagePickerDemoAppDelegate.m */,
@@ -157,6 +171,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				0323CC861FD4608F00F08879 /* Photos.framework */,
 				4AAFDA61194840F20020FCC4 /* MobileCoreServices.framework */,
 				E29A5E3B1239C42A008BB149 /* AssetsLibrary.framework */,
 				288765A40DF7441C002DB57D /* CoreGraphics.framework */,
@@ -261,6 +276,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0323CC8B1FD46B9800F08879 /* UIAlertController+Extensions.m in Sources */,
 				1D60589B0D05DD56006BFB54 /* main.m in Sources */,
 				1D3623260D0F684500981E51 /* ELCImagePickerDemoAppDelegate.m in Sources */,
 				F1DF7842196FA475003524A2 /* ELCConsole.m in Sources */,
@@ -290,7 +306,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ELCImagePickerDemo_Prefix.pch;
 				INFOPLIST_FILE = "ELCImagePickerDemo-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				PRODUCT_NAME = ELCImagePickerDemo;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
@@ -308,7 +324,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ELCImagePickerDemo_Prefix.pch;
 				INFOPLIST_FILE = "ELCImagePickerDemo-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				PRODUCT_NAME = ELCImagePickerDemo;
 				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
