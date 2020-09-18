@@ -112,11 +112,22 @@
 				if ([ALAssetsLibrary authorizationStatus] == ALAuthorizationStatusDenied) {
 					NSString *appName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleName"];
 					NSString *errorMessage = [NSString stringWithFormat:NSLocalizedString(@"This app does not have access to your photos or videos. You can enable access in Privacy Settings.", nil), appName];
-					[[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Access Denied", nil) message:errorMessage delegate:nil cancelButtonTitle:NSLocalizedString(@"Ok", nil) otherButtonTitles:nil] show];
-
+					UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Access Denied", nil)
+																				   message:errorMessage
+																			preferredStyle:UIAlertControllerStyleAlert];
+					[alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Ok", nil)
+															  style:UIAlertActionStyleCancel
+															handler:nil]];
+					[self presentViewController:alert animated:YES completion:nil];
 				} else {
 					NSString *errorMessage = [NSString stringWithFormat:@"Album Error: %@ - %@", [error localizedDescription], [error localizedRecoverySuggestion]];
-					[[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Error", nil) message:errorMessage delegate:nil cancelButtonTitle:NSLocalizedString(@"Ok", nil) otherButtonTitles:nil] show];
+					UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", nil)
+																				   message:errorMessage
+																			preferredStyle:UIAlertControllerStyleAlert];
+					[alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Ok", nil)
+															  style:UIAlertActionStyleCancel
+															handler:nil]];
+					[self presentViewController:alert animated:YES completion:nil];
 				}
 
 				[self.navigationItem setTitle:nil];
