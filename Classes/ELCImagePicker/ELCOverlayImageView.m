@@ -8,7 +8,10 @@
 
 #import "ELCOverlayImageView.h"
 #import "ELCConsole.h"
-#import "UIColor+Streetspotr.h"
+
+@interface UIColor (Streetspotr)
++ (UIColor *)streetspotrTurquois;
+@end
 
 @implementation ELCOverlayImageView
 
