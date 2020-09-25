@@ -79,7 +79,7 @@
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
 {
 	[coordinator animateAlongsideTransition:nil completion:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
-		UNUSED(context)
+#pragma unused(context)
 		self.columns = self.view.bounds.size.width / 80;
 		[self.tableView reloadData];
 	}];
