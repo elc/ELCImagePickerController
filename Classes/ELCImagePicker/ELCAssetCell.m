@@ -10,6 +10,8 @@
 #import "ELCConsole.h"
 #import "ELCOverlayImageView.h"
 
+#import "ELCStreetspotrOverlay.h"	// custom drawn overlay
+
 @interface ELCAssetCell ()
 
 @property (nonatomic, strong) NSArray *rowAssets;
@@ -69,7 +71,7 @@
             overlayView.labIndex.text = [NSString stringWithFormat:@"%d", asset.index + 1];
         } else {
             if (overlayImage == nil) {
-                overlayImage = [UIImage imageNamed:@"Overlay.png"];
+				overlayImage = [UIImage streetspotrELCOverlayImage];
             }
             ELCOverlayImageView *overlayView = [[ELCOverlayImageView alloc] initWithImage:overlayImage];
             [_overlayViewArray addObject:overlayView];
@@ -96,20 +98,23 @@
 	
 	for (int i = 0; i < [_rowAssets count]; ++i) {
         if (CGRectContainsPoint(frame, point)) {
-            ELCAsset *asset = [_rowAssets objectAtIndex:i];
-            asset.selected = !asset.selected;
-            ELCOverlayImageView *overlayView = [_overlayViewArray objectAtIndex:i];
-            overlayView.hidden = !asset.selected;
-            if (asset.selected) {
-                asset.index = [[ELCConsole mainConsole] numOfSelectedElements];
-                [overlayView setIndex:asset.index+1];
-                [[ELCConsole mainConsole] addIndex:asset.index];
-            }
-            else
-            {
-                int lastElement = [[ELCConsole mainConsole] numOfSelectedElements] - 1;
-                [[ELCConsole mainConsole] removeIndex:lastElement];
-            }
+			ELCAsset *asset = [_rowAssets objectAtIndex:i];
+			BOOL oldSelected = asset.selected;
+			asset.selected = !asset.selected;
+			if (!asset.selected != !oldSelected) {	// need this test; elsewise we may accidently remove a still used index from ELCConsole
+				ELCOverlayImageView *overlayView = [_overlayViewArray objectAtIndex:i];
+				overlayView.hidden = !asset.selected;
+				if (asset.selected) {
+					asset.index = [[ELCConsole mainConsole] numOfSelectedElements];
+					[overlayView setIndex:asset.index+1];
+					[[ELCConsole mainConsole] addIndex:asset.index];
+				}
+				else
+				{
+					int lastElement = [[ELCConsole mainConsole] numOfSelectedElements] - 1;
+					[[ELCConsole mainConsole] removeIndex:lastElement];
+				}
+			}
             break;
         }
         frame.origin.x = frame.origin.x + frame.size.width + 4;

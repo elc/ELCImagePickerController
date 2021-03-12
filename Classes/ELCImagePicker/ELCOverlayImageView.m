@@ -8,6 +8,11 @@
 
 #import "ELCOverlayImageView.h"
 #import "ELCConsole.h"
+
+@interface UIColor (Streetspotr)
++ (UIColor *)streetspotrTurquois;
+@end
+
 @implementation ELCOverlayImageView
 
 - (id)initWithFrame:(CGRect)frame
@@ -38,7 +43,7 @@
         
         if ([[ELCConsole mainConsole] onOrder]) {
             self.labIndex = [[UILabel alloc] initWithFrame:CGRectMake(5, 5, 16, 16)];
-            self.labIndex.backgroundColor = [UIColor redColor];
+			self.labIndex.backgroundColor = [UIColor streetspotrTurquois];
             self.labIndex.clipsToBounds = YES;
             self.labIndex.textAlignment = NSTextAlignmentCenter;
             self.labIndex.textColor = [UIColor whiteColor];

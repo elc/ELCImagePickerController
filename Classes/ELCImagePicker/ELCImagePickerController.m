@@ -15,6 +15,8 @@
 #import <MobileCoreServices/UTCoreTypes.h>
 #import "ELCConsole.h"
 
+NSString *const ELCIImagePickerControllerAsset = @"ELCIImagePickerControllerAsset";	// added by Streetspotr; key for returned ALAsset
+
 @implementation ELCImagePickerController
 
 //Using auto synthesizers
@@ -71,13 +73,15 @@
 {
     BOOL shouldSelect = previousCount < self.maximumImagesCount;
     if (!shouldSelect) {
-        NSString *title = [NSString stringWithFormat:NSLocalizedString(@"Only %d photos please!", nil), self.maximumImagesCount];
-        NSString *message = [NSString stringWithFormat:NSLocalizedString(@"You can only send %d photos at a time.", nil), self.maximumImagesCount];
-        [[[UIAlertView alloc] initWithTitle:title
-                                    message:message
-                                   delegate:nil
-                          cancelButtonTitle:nil
-                          otherButtonTitles:NSLocalizedString(@"Okay", nil), nil] show];
+        NSString *title = [NSString stringWithFormat:NSLocalizedString(@"Only %d photos please!", nil), (int)self.maximumImagesCount];
+        NSString *message = [NSString stringWithFormat:NSLocalizedString(@"You can only send %d photos at a time.", nil), (int)self.maximumImagesCount];
+		UIAlertController *alert = [UIAlertController alertControllerWithTitle:title
+																	   message:message
+																preferredStyle:UIAlertControllerStyleAlert];
+		[alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Okay", nil)
+												  style:UIAlertActionStyleDefault
+												handler:nil]];
+		[self presentViewController:alert animated:YES completion:nil];
     }
     return shouldSelect;
 }
@@ -118,7 +122,7 @@
             
                 if (_returnsOriginalImage) {
                     imgRef = [assetRep fullResolutionImage];
-                    orientation = [assetRep orientation];
+                    orientation = (UIImageOrientation)[assetRep orientation];
                 } else {
                     imgRef = [assetRep fullScreenImage];
                 }
@@ -126,10 +130,12 @@
                                                    scale:1.0f
                                              orientation:orientation];
                 [workingDictionary setObject:img forKey:UIImagePickerControllerOriginalImage];
-            }
+			} else {
+				[workingDictionary setObject:asset forKey:ELCIImagePickerControllerAsset];	// added by Streetspotr, because getting Asset from URL of photo stream images is not possible for some reason
+			}
 
             [workingDictionary setObject:[[asset valueForProperty:ALAssetPropertyURLs] valueForKey:[[[asset valueForProperty:ALAssetPropertyURLs] allKeys] objectAtIndex:0]] forKey:UIImagePickerControllerReferenceURL];
-            
+
             [returnArray addObject:workingDictionary];
         }
 		
@@ -141,13 +147,9 @@
     }
 }
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
+- (BOOL)shouldAutorotate
 {
-    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
-        return YES;
-    } else {
-        return toInterfaceOrientation != UIInterfaceOrientationPortraitUpsideDown;
-    }
+	return YES;
 }
 
 - (BOOL)onOrder

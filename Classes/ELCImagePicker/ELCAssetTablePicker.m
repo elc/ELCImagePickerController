@@ -34,12 +34,17 @@
 
 - (void)viewDidLoad
 {
+	[super viewDidLoad];
+
     [self.tableView setSeparatorStyle:UITableViewCellSeparatorStyleNone];
 	[self.tableView setAllowsSelection:NO];
 
     NSMutableArray *tempArray = [[NSMutableArray alloc] init];
     self.elcAssets = tempArray;
-	
+
+	self.singleSelection = (self.parent.maximumImagesCount == 1);
+	self.immediateReturn = (self.parent.maximumImagesCount == 1);
+
     if (self.immediateReturn) {
         
     } else {
@@ -67,16 +72,18 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self name:ALAssetsLibraryChangedNotification object:nil];
 }
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
-{
-    return YES;
+- (BOOL)shouldAutorotate {
+	return YES;
 }
 
-- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation
+- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
 {
-    [super didRotateFromInterfaceOrientation:fromInterfaceOrientation];
-    self.columns = self.view.bounds.size.width / 80;
-    [self.tableView reloadData];
+	[coordinator animateAlongsideTransition:nil completion:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
+#pragma unused(context)
+		self.columns = self.view.bounds.size.width / 80;
+		[self.tableView reloadData];
+	}];
+	[super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
 }
 
 - (void)preparePhotos
